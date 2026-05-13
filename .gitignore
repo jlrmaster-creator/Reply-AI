@@ -1,0 +1,8 @@
+node_modules/
+reply-ai/node_modules/
+reply-ai/backend/node_modules/
+reply-ai/mobile/node_modules/
+*.log
+.env
+dist/
+.DS_Store
