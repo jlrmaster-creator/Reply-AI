@@ -7,6 +7,6 @@
   </defs>
   <rect width="512" height="512" rx="96" fill="url(#bg)"/>
   <path d="M120 180 Q120 120 180 120 L332 120 Q392 120 392 180 L392 300 Q392 360 332 360 L256 360 L200 416 L200 360 L180 360 Q120 360 120 300 Z" fill="white"/>
-  <text x="210" y="282" font-family="Arial,Helvetica,sans-serif" font-size="160" font-weight="800" fill="#2d6a4f" text-anchor="middle">R</text>
+  <text x="210" y="282" font-family="Arial,Helvetica,sans-serif" font-size="160" font-weight="800" fill="#2d6a4f" text-anchor="middle">T</text>
   <text x="320" y="268" font-family="Arial,Helvetica,sans-serif" font-size="80" font-weight="600" fill="#40916c" text-anchor="middle">ai</text>
 </svg>
