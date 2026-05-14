@@ -113,7 +113,25 @@ function MainApp() {
         </div>
       )}
 
-      <footer className="app-footer">Created by: José López-Romero Moraleda</footer>
+    </div>
+  );
+}
+
+function AppShell({ children }) {
+  return (
+    <div className="app-shell">
+      {children}
+      <footer className="app-footer">
+        Created by: José López-Romero Moraleda &copy; 2026
+      </footer>
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div className="loading-screen">
+      <div className="loading-spinner" />
     </div>
   );
 }
@@ -123,11 +141,11 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-      </div>
+      <AppShell>
+        <LoadingScreen />
+      </AppShell>
     );
   }
 
-  return user ? <MainApp /> : <LoginScreen />;
+  return <AppShell>{user ? <MainApp /> : <LoginScreen />}</AppShell>;
 }

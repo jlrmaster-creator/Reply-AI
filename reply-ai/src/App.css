@@ -821,12 +821,18 @@ textarea::placeholder {
   color: #40916c;
 }
 
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .app-footer {
   text-align: center;
   font-size: 11px;
   color: #94a3b8;
-  padding: 24px 0 8px;
-  margin-top: 24px;
+  padding: 16px;
+  margin-top: auto;
   border-top: 1px solid #e2e8f0;
 }
 
