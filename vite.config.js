@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/*.svg"],
       manifest: {
-        name: "Reply AI",
-        short_name: "Reply AI",
-        description: "Asistente inteligente para responder mensajes",
+        name: "Toolbox AI",
+        short_name: "Toolbox AI",
+        description: "Caja de herramientas inteligente",
         theme_color: "#2d6a4f",
         background_color: "#f0f4f8",
         display: "standalone",

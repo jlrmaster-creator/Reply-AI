@@ -1,0 +1,59 @@
+import React, { useState } from "react";
+
+export default function Favorites({ favorites, error, onAdd, onRemove }) {
+  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [showForm, setShowForm] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    onAdd({ name: name.trim(), url: url.trim(), description: description.trim() });
+    setName("");
+    setUrl("");
+    setDescription("");
+    setShowForm(false);
+  };
+
+  const sorted = [...favorites].sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <div className="favorites">
+      {error && <p className="error">{error}</p>}
+
+      <div className="favorites-header">
+        <h3>Favoritos {favorites.length > 0 && <span className="count-badge">{favorites.length}</span>}</h3>
+        <button className="add-fav-btn" onClick={() => setShowForm(!showForm)}>
+          {showForm ? "✕ Cerrar" : "+ Añadir favorito"}
+        </button>
+      </div>
+
+      {showForm && (
+        <form className="fav-form fade-in" onSubmit={handleSubmit}>
+          <input className="cf-input" type="text" placeholder="Nombre" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input className="cf-input" type="url" placeholder="URL (https://...)" value={url} onChange={(e) => setUrl(e.target.value)} />
+          <input className="cf-input" type="text" placeholder="Descripción" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <button className="generate-btn" type="submit">Guardar</button>
+        </form>
+      )}
+
+      {sorted.length === 0 && !showForm && (
+        <p className="favorites-empty">No has añadido ningún favorito todavía.</p>
+      )}
+
+      <div className="favorites-list">
+        {sorted.map((f) => (
+          <div key={f.id} className="fav-item fade-in">
+            <div className="fav-item-info">
+              <a className="fav-item-name" href={f.url} target="_blank" rel="noopener noreferrer">{f.name}</a>
+              {f.description && <span className="fav-item-desc">{f.description}</span>}
+              {f.url && <span className="fav-item-url">{f.url}</span>}
+            </div>
+            <button className="fav-item-delete" onClick={() => onRemove(f.id)} title="Eliminar">✕</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
