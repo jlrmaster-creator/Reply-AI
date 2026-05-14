@@ -13,6 +13,7 @@ import Birthdays from "./components/Birthdays";
 import Contacts from "./components/Contacts";
 import Favorites from "./components/Favorites";
 import Converter from "./components/Converter";
+import Entertainment from "./components/Entertainment";
 import "./App.css";
 
 const MENU_ITEMS = [
@@ -21,7 +22,7 @@ const MENU_ITEMS = [
   { key: "contacts", label: "Contactos", icon: "👥" },
   { key: "converter", label: "Conversor", icon: "🔄" },
   { key: "favorites", label: "Favoritos", icon: "🔗" },
-  { key: "entertainment", label: "Entretenimiento", icon: "🎮", url: "https://jlrmaster-creator.github.io/pepe_game/1.html" },
+  { key: "entertainment", label: "Entretenimiento", icon: "🎮" },
 ];
 
 function MainApp() {
@@ -137,6 +138,10 @@ function MainApp() {
       ) : tab === "converter" ? (
         <div className="tab-content">
           <Converter />
+        </div>
+      ) : tab === "entertainment" ? (
+        <div className="tab-content">
+          <Entertainment />
         </div>
       ) : (
         <div className="tab-content">
