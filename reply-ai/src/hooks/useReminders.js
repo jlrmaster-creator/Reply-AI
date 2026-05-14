@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { subscribeReminders, subscribeSharedReminders, addReminder as addSvc, updateReminder as updateSvc, removeReminder as removeSvc, shareReminder as shareSvc, unshareReminder as unshareSvc } from "../services/reminderService";
+import { subscribeReminders, subscribeSharedReminders, addReminder as addSvc, updateReminder as updateSvc, removeReminder as removeSvc, shareReminder as shareSvc, unshareReminder as unshareSvc, ensureUserDocument, lookupUidByEmail } from "../services/reminderService";
 
 const MAX = 5;
 
@@ -27,47 +27,6 @@ function shouldFireNow(r) {
   return false;
 }
 
-function getNextFire(r) {
-  const now = getNow();
-  const today = new Date();
-  let next = new Date(today.getFullYear(), today.getMonth(), today.getDate(), r.hour || 0, r.minute || 0);
-
-  if (!r.active) return null;
-
-  if (r.frequency === "daily") {
-    if (next <= today) next.setDate(next.getDate() + 1);
-  } else if (r.frequency === "weekly") {
-    const diff = (r.weekday - now.dow + 7) % 7;
-    next.setDate(next.getDate() + (diff === 0 && next <= today ? 7 : diff));
-  } else if (r.frequency === "monthly") {
-    next.setDate(r.day);
-    if (next <= today) next.setMonth(next.getMonth() + 1);
-  } else if (r.frequency === "once") {
-    next.setMonth(r.month - 1);
-    next.setDate(r.day);
-    if (next <= today) return null;
-  }
-  return next;
-}
-
-function formatFireTime(r) {
-  const h = String(r.hour || 0).padStart(2, "0");
-  const m = String(r.minute || 0).padStart(2, "0");
-  let text = `${h}:${m}`;
-  if (r.frequency === "daily") text += " (a diario)";
-  else if (r.frequency === "weekly") text += ` (cada ${["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][r.weekday]})`;
-  else if (r.frequency === "monthly") text += ` (día ${r.day})`;
-  else if (r.frequency === "once") text += ` (${r.day}/${r.month})`;
-  return text;
-}
-
-function firedToday(r) {
-  if (!r.lastFiredAt) return false;
-  const fired = new Date(r.lastFiredAt);
-  const now = new Date();
-  return fired.getDate() === now.getDate() && fired.getMonth() === now.getMonth() && fired.getFullYear() === now.getFullYear();
-}
-
 export function useReminders() {
   const { user } = useAuth();
   const [reminders, setReminders] = useState([]);
@@ -79,47 +38,41 @@ export function useReminders() {
   useEffect(() => {
     if (!user) return;
     setError("");
+    if (user.email) ensureUserDocument(user.uid, user.email).catch(() => {});
 
-    const mergeState = () => {
-      let combined = {};
-      let err = null;
+    let owned = [];
+    let shared = [];
 
-      const tryFlush = () => {
-        if (err) {
-          setError("Error al cargar recordatorios: " + getErrorMessage(err));
-          return;
+    const merge = () => {
+      const seen = new Set();
+      const merged = [];
+      for (const r of [...owned, ...shared]) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id);
+          merged.push(r);
         }
-        const owned = combined._owned || [];
-        const shared = combined._shared || [];
-        const seen = new Set();
-        const merged = [];
-        for (const r of [...owned, ...shared]) {
-          if (!seen.has(r.id)) {
-            seen.add(r.id);
-            merged.push(r);
-          }
-        }
-        setReminders(merged);
-      };
-
-      const unsub1 = subscribeReminders(user.uid, (items) => {
-        combined._owned = items;
-        tryFlush();
-      }, (e) => { err = e; tryFlush(); });
-
-      const unsub2 = user.email ? subscribeSharedReminders(user.email, (items) => {
-        combined._shared = items;
-        tryFlush();
-      }, (e) => { err = e; tryFlush(); }) : null;
-
-      return () => {
-        unsub1();
-        if (unsub2) unsub2();
-      };
+      }
+      setReminders(merged);
     };
 
-    const cleanup = mergeState();
-    return cleanup;
+    const unsub1 = subscribeReminders(user.uid, (items) => {
+      owned = items;
+      merge();
+    }, (e) => {
+      setError("Error al cargar recordatorios: " + getErrorMessage(e));
+    });
+
+    const unsub2 = subscribeSharedReminders(user.uid, (items) => {
+      shared = items;
+      merge();
+    }, (e) => {
+      console.error("Shared reminders error:", e);
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+    };
   }, [user]);
 
   useEffect(() => {
@@ -199,20 +152,29 @@ export function useReminders() {
       return;
     }
     try {
-      await shareSvc(id, email);
+      const uid = await lookupUidByEmail(email);
+      if (!uid) {
+        setError("Ese usuario no está registrado en Toolbox AI.");
+        return;
+      }
+      if (uid === user.uid) {
+        setError("No puedes compartir un recordatorio contigo mismo.");
+        return;
+      }
+      await shareSvc(id, uid, email);
     } catch (err) {
       setError("Error al compartir recordatorio: " + getErrorMessage(err));
     }
-  }, []);
+  }, [user]);
 
-  const unshareReminder = useCallback(async (id, email) => {
+  const unshareReminder = useCallback(async (id, uid, email) => {
     setError("");
     try {
-      await unshareSvc(id, email);
+      await unshareSvc(id, uid, email);
     } catch (err) {
       setError("Error al eliminar uso compartido: " + getErrorMessage(err));
     }
   }, []);
 
-  return { reminders, error, justFired, userEmail: user?.email, addReminder, updateReminder, removeReminder, shareReminder, unshareReminder, firedToday, formatFireTime, getNextFire };
+  return { reminders, error, justFired, userEmail: user?.email, addReminder, updateReminder, removeReminder, shareReminder, unshareReminder };
 }

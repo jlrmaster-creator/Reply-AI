@@ -29,7 +29,7 @@ function firedToday(r) {
 
 const EMPTY_FORM = { name: "", note: "", frequency: "daily", hour: 8, minute: 0, weekday: 1, day: 1, month: 1 };
 
-export default function Reminders({ reminders, error, justFired, userEmail, onAdd, onUpdate, onRemove, onShare, onUnshare }) {
+export default function Reminders({ reminders, error, justFired, onAdd, onUpdate, onRemove, onShare, onUnshare }) {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -169,12 +169,12 @@ export default function Reminders({ reminders, error, justFired, userEmail, onAd
                 {r.isShared && r.ownerEmail && (
                   <span className="reminder-shared-from">Compartido por {r.ownerEmail}</span>
                 )}
-                {!r.isShared && r.sharedWith && r.sharedWith.length > 0 && (
+                {!r.isShared && r.sharedWithEmails && r.sharedWithEmails.length > 0 && (
                   <div className="reminder-shared-with">
-                    {r.sharedWith.map((em) => (
+                    {r.sharedWithEmails.map((em, i) => (
                       <span key={em} className="reminder-shared-tag">
                         {em}
-                        <button className="reminder-shared-remove" onClick={() => onUnshare(r.id, em)} title="Eliminar">✕</button>
+                        <button className="reminder-shared-remove" onClick={() => onUnshare(r.id, r.sharedWithUids[i], em)} title="Eliminar">✕</button>
                       </span>
                     ))}
                   </div>
