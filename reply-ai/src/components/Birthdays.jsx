@@ -1,0 +1,211 @@
+import React, { useState } from "react";
+
+const MONTHS = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
+function formatDate(dateStr) {
+  const [day, month] = dateStr.split("-");
+  return `${parseInt(day, 10)} de ${MONTHS[parseInt(month, 10) - 1]}`;
+}
+
+export default function Birthdays({
+  friends,
+  todayBirthdays,
+  onAdd,
+  onRemove,
+  onSendGreeting,
+  onSendReminder,
+}) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
+  const [gender, setGender] = useState("male");
+  const [showForm, setShowForm] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim() || !day || !month) return;
+    const date = `${String(parseInt(day, 10)).padStart(2, "0")}-${String(parseInt(month, 10)).padStart(2, "0")}`;
+    onAdd(name.trim(), date, gender, phone.trim());
+    setName("");
+    setPhone("");
+    setDay("");
+    setMonth("");
+    setGender("male");
+    setShowForm(false);
+  };
+
+  const sorted = [...friends].sort((a, b) => {
+    const [ad, am] = a.date.split("-").map(Number);
+    const [bd, bm] = b.date.split("-").map(Number);
+    return am - bm || ad - bd;
+  });
+
+  return (
+    <div className="birthdays">
+      {todayBirthdays.length > 0 && (
+        <div className="birthday-alert fade-in">
+          <div className="birthday-alert-icon">🎂</div>
+          <div className="birthday-alert-body">
+            <strong>
+              {todayBirthdays.length === 1
+                ? "¡Hoy es el cumpleaños de"
+                : "¡Hoy es el cumpleaños de"}{" "}
+              {todayBirthdays.map((f) => f.name).join(" y ")}!
+            </strong>
+            <div className="birthday-alert-actions">
+              {todayBirthdays.map((f) => (
+                <div key={f.id} className="birthday-alert-row">
+                  <button
+                    className="action-btn primary"
+                    onClick={() => onSendGreeting(f)}
+                  >
+                    🎉 Felicitar a {f.name}
+                  </button>
+                  <button
+                    className="action-btn"
+                    onClick={() => onSendReminder(f)}
+                  >
+                    🔔 Recordarme
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="birthdays-header">
+        <h3>Tus amigos</h3>
+        <button
+          className="add-friend-btn"
+          onClick={() => setShowForm(!showForm)}
+        >
+          {showForm ? "✕ Cerrar" : "+ Añadir amigo"}
+        </button>
+      </div>
+
+      {showForm && (
+        <form className="birthday-form fade-in" onSubmit={handleSubmit}>
+          <input
+            className="bf-input"
+            type="text"
+            placeholder="Nombre"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <input
+            className="bf-input"
+            type="tel"
+            placeholder="Teléfono (ej: 521234567890)"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+          <div className="bf-row">
+            <select
+              className="bf-select"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              required
+            >
+              <option value="">Día</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+            <select
+              className="bf-select"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              required
+            >
+              <option value="">Mes</option>
+              {MONTHS.map((m, i) => (
+                <option key={i} value={i + 1}>
+                  {m}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="bf-gender">
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="male"
+                checked={gender === "male"}
+                onChange={() => setGender("male")}
+              />
+              Masculino
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="female"
+                checked={gender === "female"}
+                onChange={() => setGender("female")}
+              />
+              Femenino
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="gender"
+                value="other"
+                checked={gender === "other"}
+                onChange={() => setGender("other")}
+              />
+              Otro / No sé
+            </label>
+          </div>
+          <button className="generate-btn" type="submit">
+            Guardar
+          </button>
+        </form>
+      )}
+
+      {sorted.length === 0 && (
+        <p className="birthdays-empty">
+          No has añadido ningún cumpleaños todavía.
+        </p>
+      )}
+
+      <div className="birthdays-list">
+        {sorted.map((f) => (
+          <div key={f.id} className="birthday-item fade-in">
+            <div className="birthday-item-info">
+              <span className="birthday-item-name">
+                {f.name}
+                {f.gender === "male" && " 👨"}
+                {f.gender === "female" && " 👩"}
+                {f.gender === "other" && " 🧑"}
+              </span>
+              <span className="birthday-item-date">
+                🗓️ {formatDate(f.date)}
+              </span>
+              {f.phone && (
+                <span className="birthday-item-phone">
+                  📞 {f.phone}
+                </span>
+              )}
+            </div>
+            <button
+              className="birthday-item-delete"
+              onClick={() => onRemove(f.id)}
+              title="Eliminar"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -1,25 +1,23 @@
 import { useState, useCallback, useEffect } from "react";
-import { generateReply } from "../services/api";
+import responsesRaw from "../../../responses.properties?raw";
 
-const DAILY_LIMIT = 3;
 const STORAGE_KEY = "reply-ai-history";
-const COUNT_KEY = "reply-ai-count";
-const DATE_KEY = "reply-ai-date";
 
-function getToday() {
-  return new Date().toDateString();
-}
-
-function getDailyCount() {
-  const saved = localStorage.getItem(COUNT_KEY);
-  const date = localStorage.getItem(DATE_KEY);
-  if (date !== getToday()) {
-    localStorage.setItem(COUNT_KEY, "0");
-    localStorage.setItem(DATE_KEY, getToday());
-    return 0;
+function parseResponses(raw) {
+  const modes = { funny: [], elegant: [], cold: [], excuse: [] };
+  const lines = raw.split("\n").filter((l) => l.trim() && !l.trim().startsWith("#"));
+  for (const line of lines) {
+    const eq = line.indexOf("=");
+    if (eq === -1) continue;
+    const key = line.slice(0, eq).trim();
+    const val = line.slice(eq + 1).trim();
+    const [mode] = key.split(".");
+    if (modes[mode]) modes[mode].push(val);
   }
-  return saved ? parseInt(saved, 10) : 0;
+  return modes;
 }
+
+const responsesByMode = parseResponses(responsesRaw);
 
 export function useReply() {
   const [message, setMessage] = useState("");
@@ -31,22 +29,6 @@ export function useReply() {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
   });
-  const [dailyCount, setDailyCount] = useState(getDailyCount);
-  const [premium, setPremium] = useState(false);
-
-  useEffect(() => {
-    const count = getDailyCount();
-    setDailyCount(count);
-  }, []);
-
-  const incrementCount = useCallback(() => {
-    const newCount = dailyCount + 1;
-    setDailyCount(newCount);
-    localStorage.setItem(COUNT_KEY, String(newCount));
-    localStorage.setItem(DATE_KEY, getToday());
-  }, [dailyCount]);
-
-  const canGenerate = premium || dailyCount < DAILY_LIMIT;
 
   const generate = useCallback(
     async (overrideMode) => {
@@ -54,28 +36,20 @@ export function useReply() {
         setError("Pega un mensaje primero");
         return;
       }
-      if (!canGenerate) {
-        setError("Límite diario alcanzado. Actualiza a premium.");
-        return;
-      }
       setLoading(true);
       setError("");
-      try {
-        const activeMode = overrideMode || mode;
-        const data = await generateReply(message, activeMode);
-        setResponse(data.reply);
-        const entry = { message, reply: data.reply, mode: activeMode, date: new Date().toISOString() };
-        const updated = [entry, ...history].slice(0, 50);
-        setHistory(updated);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        if (!premium) incrementCount();
-      } catch {
-        setError("Error al generar. Intenta de nuevo.");
-      } finally {
-        setLoading(false);
-      }
+      const activeMode = typeof overrideMode === "string" ? overrideMode : mode;
+      const list = responsesByMode[activeMode] || responsesByMode.elegant;
+      const reply = list[Math.floor(Math.random() * list.length)];
+      await new Promise((r) => setTimeout(r, 300));
+      setResponse(reply);
+      const entry = { message, reply, mode: activeMode, date: new Date().toISOString() };
+      const updated = [entry, ...history].slice(0, 50);
+      setHistory(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      setLoading(false);
     },
-    [message, mode, premium, dailyCount, history, canGenerate, incrementCount]
+    [message, mode, history]
   );
 
   const makeFunnier = useCallback(() => {
@@ -100,10 +74,9 @@ export function useReply() {
     mode, setMode,
     response, setResponse,
     loading, error,
-    history, dailyCount,
-    premium, setPremium,
-    canGenerate, DAILY_LIMIT,
+    history,
     generate, makeFunnier,
-    sendToWhatsApp, clearHistory,
+    sendToWhatsApp,
+    clearHistory,
   };
 }

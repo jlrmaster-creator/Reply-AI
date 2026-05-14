@@ -6,3 +6,5 @@ reply-ai/mobile/node_modules/
 .env
 dist/
 .DS_Store
+prompt.md
+responses.properties.bak

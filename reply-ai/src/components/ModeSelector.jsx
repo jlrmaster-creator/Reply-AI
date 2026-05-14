@@ -1,10 +1,10 @@
 import React from "react";
 
 const modes = [
-  { key: "funny", label: "Gracioso", emoji: "😂" },
-  { key: "elegant", label: "Elegante", emoji: "🎩" },
-  { key: "cold", label: "Frío", emoji: "🧊" },
-  { key: "excuse", label: "Excusa", emoji: "🚪" },
+  { key: "funny", label: "Gracioso", icon: "😄" },
+  { key: "elegant", label: "Elegante", icon: "⭐" },
+  { key: "cold", label: "Frío", icon: "❄️" },
+  { key: "excuse", label: "Excusa", icon: "🔑" },
 ];
 
 export default function ModeSelector({ selected, onSelect }) {
@@ -16,7 +16,7 @@ export default function ModeSelector({ selected, onSelect }) {
           className={`mode-btn ${selected === m.key ? "active" : ""}`}
           onClick={() => onSelect(m.key)}
         >
-          <span className="mode-emoji">{m.emoji}</span>
+          <span className="mode-emoji">{m.icon}</span>
           <span className="mode-label">{m.label}</span>
         </button>
       ))}
