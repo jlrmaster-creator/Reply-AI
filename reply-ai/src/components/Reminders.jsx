@@ -11,8 +11,12 @@ const WEEKDAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes
 
 const START_HOURS = { false: 9, true: 7 };
 
+function earlyHour(r) {
+  return r.earlyBird ? 7 : 9;
+}
+
 function formatFireTime(r) {
-  const h = START_HOURS[r.earlyBird];
+  const h = earlyHour(r);
   if (r.frequency === "daily") return `A diario (${h}:00)`;
   if (r.frequency === "weekly") return `Cada ${WEEKDAYS[r.weekday]} (${h}:00)`;
   if (r.frequency === "monthly") return `Día ${r.day} de cada mes (${h}:00)`;
@@ -26,7 +30,7 @@ function firedRecently(r) {
 }
 
 function startHourText(early) {
-  return START_HOURS[early] + ":00";
+  return (early ? 7 : 9) + ":00";
 }
 
 const EMPTY_FORM = { name: "", note: "", frequency: "daily", weekday: 1, day: 1, month: 1, earlyBird: false };
@@ -148,7 +152,7 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
             <span>¿Eres madrugador? La primera notificación sonará a las <strong>{startHourText(form.earlyBird)}</strong></span>
           </label>
 
-          <p className="reminder-form-hint">El aviso sonará cada hora desde las {startHourText(form.earlyBird)} hasta que lo desactives.</p>
+          <p className="reminder-form-hint">El aviso sonará cada hora desde las {startHourText(form.earlyBird)} hasta que lo desactives (🔔).</p>
 
           <div className="reminder-form-actions">
             <button type="button" className="reminder-cancel-btn" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancelar</button>
@@ -173,7 +177,7 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
                 </div>
                 {r.note && <span className="reminder-item-note">{r.note}</span>}
                 <span className="reminder-item-time">{formatFireTime(r)}</span>
-                {r.active && <span className="reminder-hourly-note">Cada hora desde las {startHourText(r.earlyBird)} hasta desactivar</span>}
+                {r.active && <span className="reminder-hourly-note">Cada hora desde las {startHourText(r.earlyBird)} hasta desactivar (🔔)</span>}
                 {r.isShared && r.ownerEmail && (
                   <span className="reminder-shared-from">Compartido por {r.ownerEmail}</span>
                 )}
