@@ -112,6 +112,8 @@ function MainApp() {
         />
         </div>
       )}
+
+      <footer className="app-footer">Created by: José López-Romero Moraleda</footer>
     </div>
   );
 }
