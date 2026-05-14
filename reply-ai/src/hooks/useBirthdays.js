@@ -36,15 +36,21 @@ export function useBirthdays() {
     setTodayBirthdays(matches);
   }, [friends]);
 
+  const MAX = 100;
+
   const addFriend = useCallback(async (name, date, gender, phone) => {
     if (!user) return;
     setError("");
+    if (friends.length >= MAX) {
+      setError(`Límite alcanzado: máximo ${MAX} cumpleaños. Elimina algunos para añadir más.`);
+      return;
+    }
     try {
       await addFriendService({ name, date, gender, phone }, user.uid);
     } catch (err) {
       setError("Error al añadir amigo: " + getErrorMessage(err));
     }
-  }, [user]);
+  }, [user, friends.length]);
 
   const removeFriend = useCallback(async (id) => {
     setError("");

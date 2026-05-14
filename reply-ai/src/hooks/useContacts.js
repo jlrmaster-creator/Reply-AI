@@ -22,15 +22,21 @@ export function useContacts() {
     return unsubscribe;
   }, [user]);
 
+  const MAX = 100;
+
   const addContact = useCallback(async ({ name, phone, email, city, webpage, occupation, rating }) => {
     if (!user) return;
     setError("");
+    if (contacts.length >= MAX) {
+      setError(`Límite alcanzado: máximo ${MAX} contactos. Elimina algunos para añadir más.`);
+      return;
+    }
     try {
       await addContactService({ name, phone, email, city, webpage, occupation, rating }, user.uid);
     } catch (err) {
       setError("Error al añadir contacto: " + getErrorMessage(err));
     }
-  }, [user]);
+  }, [user, contacts.length]);
 
   const removeContact = useCallback(async (id) => {
     setError("");
