@@ -21,6 +21,7 @@ const MENU_ITEMS = [
   { key: "contacts", label: "Contactos", icon: "👥" },
   { key: "converter", label: "Conversor", icon: "🔄" },
   { key: "favorites", label: "Favoritos", icon: "🔗" },
+  { key: "entertainment", label: "Entretenimiento", icon: "🎮", url: "https://jlrmaster-creator.github.io/pepe_game/1.html" },
 ];
 
 function MainApp() {
@@ -45,11 +46,18 @@ function MainApp() {
   }, []);
 
   const selectTab = (key) => {
+    const item = MENU_ITEMS.find((m) => m.key === key);
+    if (item?.url) {
+      window.open(item.url, "_blank");
+      setMenuOpen(false);
+      return;
+    }
     setTab(key);
     setMenuOpen(false);
   };
 
-  const currentLabel = MENU_ITEMS.find((m) => m.key === tab)?.label || "";
+  const currentItem = MENU_ITEMS.find((m) => m.key === tab);
+  const currentLabel = currentItem && !currentItem.url ? currentItem.label : "";
 
   return (
     <div className="container">
