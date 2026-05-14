@@ -1,19 +1,19 @@
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 
 const COLLECTION = "birthdays";
 
-export function subscribeFriends(userId, callback) {
+export function subscribeFriends(userId, callback, onError) {
   const q = query(
     collection(db, COLLECTION),
-    where("userId", "==", userId),
-    orderBy("createdAt", "asc")
+    where("userId", "==", userId)
   );
   return onSnapshot(q, (snapshot) => {
     const friends = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     callback(friends);
   }, (error) => {
     console.error("Firestore subscribe error:", error);
+    if (onError) onError(error);
   });
 }
 

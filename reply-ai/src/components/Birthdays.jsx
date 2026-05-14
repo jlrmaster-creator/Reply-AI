@@ -13,6 +13,7 @@ function formatDate(dateStr) {
 export default function Birthdays({
   friends,
   todayBirthdays,
+  error,
   onAdd,
   onRemove,
   onSendGreeting,
@@ -46,6 +47,7 @@ export default function Birthdays({
 
   return (
     <div className="birthdays">
+      {error && <p className="error">{error}</p>}
       {todayBirthdays.length > 0 && (
         <div className="birthday-alert fade-in">
           <div className="birthday-alert-icon">🎂</div>

@@ -104,6 +104,7 @@ function MainApp() {
         <Birthdays
           friends={birthdays.friends}
           todayBirthdays={birthdays.todayBirthdays}
+          error={birthdays.error}
           onAdd={birthdays.addFriend}
           onRemove={birthdays.removeFriend}
           onSendGreeting={birthdays.sendGreeting}

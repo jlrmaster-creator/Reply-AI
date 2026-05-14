@@ -13,12 +13,20 @@ export function useBirthdays() {
   const { user } = useAuth();
   const [friends, setFriends] = useState([]);
   const [todayBirthdays, setTodayBirthdays] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!user) return;
-    const unsubscribe = subscribeFriends(user.uid, (data) => {
-      setFriends(data);
-    });
+    setError("");
+    const unsubscribe = subscribeFriends(
+      user.uid,
+      (data) => {
+        setFriends(data);
+      },
+      (err) => {
+        setError("Error al cargar amigos: " + getErrorMessage(err));
+      }
+    );
     return unsubscribe;
   }, [user]);
 
@@ -30,18 +38,20 @@ export function useBirthdays() {
 
   const addFriend = useCallback(async (name, date, gender, phone) => {
     if (!user) return;
+    setError("");
     try {
       await addFriendService({ name, date, gender, phone }, user.uid);
-    } catch (error) {
-      console.error("Error adding friend:", error);
+    } catch (err) {
+      setError("Error al añadir amigo: " + getErrorMessage(err));
     }
   }, [user]);
 
   const removeFriend = useCallback(async (id) => {
+    setError("");
     try {
       await removeFriendService(id);
-    } catch (error) {
-      console.error("Error removing friend:", error);
+    } catch (err) {
+      setError("Error al eliminar amigo: " + getErrorMessage(err));
     }
   }, []);
 
@@ -76,9 +86,19 @@ export function useBirthdays() {
   return {
     friends,
     todayBirthdays,
+    error,
     addFriend,
     removeFriend,
     sendGreeting,
     sendReminder,
   };
+}
+
+function getErrorMessage(err) {
+  if (!err) return "Error desconocido";
+  if (err.code === "permission-denied") return "Permiso denegado. Revisa las reglas de Firestore.";
+  if (err.code === "unavailable") return "Firestore no disponible. Revisa los índices.";
+  if (err.code === "not-found") return "No encontrado";
+  if (typeof err === "string") return err;
+  return err.message || "Error desconocido";
 }
