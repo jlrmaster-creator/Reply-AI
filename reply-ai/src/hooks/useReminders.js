@@ -24,11 +24,12 @@ function getAudioCtx() {
 document.addEventListener("click", () => { const c = getAudioCtx(); if (c?.state === "suspended") c.resume(); }, { once: true });
 document.addEventListener("touchstart", () => { const c = getAudioCtx(); if (c?.state === "suspended") c.resume(); }, { once: true });
 
-function playNotificationSound() {
+async function playNotificationSound() {
   try {
     const ctx = getAudioCtx();
     if (!ctx) return;
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") await ctx.resume();
+    if (ctx.state !== "running") return;
     const play = (freq, start, duration) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -45,7 +46,9 @@ function playNotificationSound() {
     play(523, t, 0.15);
     play(659, t + 0.15, 0.15);
     play(784, t + 0.3, 0.3);
-  } catch {}
+  } catch (e) {
+    console.warn("Sound error:", e);
+  }
 }
 
 function getNow() {
@@ -115,9 +118,17 @@ export function useReminders() {
   useEffect(() => {
     if (!user || reminders.length === 0) return;
 
-    if (!permAsked.current && "Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
-      permAsked.current = true;
+    if (!permAsked.current && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then((r) => {
+          if (r !== "default") permAsked.current = true;
+          console.log("Notification permission:", r);
+        });
+        permAsked.current = true;
+      } else {
+        permAsked.current = true;
+        console.log("Notification permission:", Notification.permission);
+      }
     }
 
     intervalRef.current = setInterval(async () => {
@@ -139,9 +150,21 @@ export function useReminders() {
 
           const notifBody = r.name + (r.note ? " — " + r.note : "");
           if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
+            try {
+              new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
+            } catch (nErr) {
+              console.warn("Notification error:", nErr);
+            }
+          } else if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission().then((p) => {
+              if (p === "granted") {
+                new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
+              }
+            });
           }
-        } catch {}
+        } catch (e) {
+          console.warn("Reminder fire error:", e);
+        }
       }
     }, 30000);
 
