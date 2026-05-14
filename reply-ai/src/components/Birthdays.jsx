@@ -25,6 +25,7 @@ export default function Birthdays({
   const [month, setMonth] = useState("");
   const [gender, setGender] = useState("male");
   const [showForm, setShowForm] = useState(false);
+  const [search, setSearch] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,7 +40,10 @@ export default function Birthdays({
     setShowForm(false);
   };
 
-  const sorted = [...friends].sort((a, b) => {
+  const q = search.toLowerCase();
+  const filtered = friends.filter((f) => f.name.toLowerCase().includes(q));
+
+  const sorted = [...filtered].sort((a, b) => {
     const [ad, am] = a.date.split("-").map(Number);
     const [bd, bm] = b.date.split("-").map(Number);
     return am - bm || ad - bd;
@@ -81,7 +85,7 @@ export default function Birthdays({
       )}
 
       <div className="birthdays-header">
-        <h3>Tus amigos</h3>
+        <h3>Tus amigos {friends.length > 0 && <span className="count-badge">{friends.length}</span>}</h3>
         <button
           className="add-friend-btn"
           onClick={() => setShowForm(!showForm)}
@@ -173,9 +177,19 @@ export default function Birthdays({
         </form>
       )}
 
+      {friends.length > 0 && (
+        <div className="search-box">
+          <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input className="search-input" type="text" placeholder="Buscar amigo..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          {search && <button className="search-clear" onClick={() => setSearch("")}>✕</button>}
+        </div>
+      )}
+
       {sorted.length === 0 && (
         <p className="birthdays-empty">
-          No has añadido ningún cumpleaños todavía.
+          {search ? "No se encontraron amigos." : "No has añadido ningún cumpleaños todavía."}
         </p>
       )}
 
