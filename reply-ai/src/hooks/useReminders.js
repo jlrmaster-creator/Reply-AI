@@ -131,44 +131,55 @@ export function useReminders() {
       }
     }
 
-    intervalRef.current = setInterval(async () => {
-      for (const r of reminders) {
-        if (r.isShared) continue;
-        if (!shouldFireNow(r)) continue;
-        const now = getNow();
-        if (r.lastFiredAt) {
-          const fired = new Date(r.lastFiredAt);
-          if (fired.getDate() === now.day && fired.getMonth() + 1 === now.month && fired.getFullYear() === new Date().getFullYear()) continue;
-        }
-
-        try {
-          await updateSvc(r.id, { lastFiredAt: new Date().toISOString() });
-          setJustFired(r.id);
-          setTimeout(() => setJustFired(null), 5000);
-
-          playNotificationSound();
-
-          const notifBody = r.name + (r.note ? " — " + r.note : "");
-          if ("Notification" in window && Notification.permission === "granted") {
-            try {
-              new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
-            } catch (nErr) {
-              console.warn("Notification error:", nErr);
-            }
-          } else if ("Notification" in window && Notification.permission === "default") {
-            Notification.requestPermission().then((p) => {
-              if (p === "granted") {
-                new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
-              }
-            });
-          }
-        } catch (e) {
-          console.warn("Reminder fire error:", e);
-        }
+    const tryFire = async (r) => {
+      if (r.isShared) return;
+      if (!shouldFireNow(r)) return;
+      const now = getNow();
+      if (r.lastFiredAt) {
+        const fired = new Date(r.lastFiredAt);
+        if (fired.getDate() === now.day && fired.getMonth() + 1 === now.month && fired.getFullYear() === new Date().getFullYear()) return;
       }
-    }, 30000);
+      try {
+        await updateSvc(r.id, { lastFiredAt: new Date().toISOString() });
+        setJustFired(r.id);
+        setTimeout(() => setJustFired(null), 5000);
 
-    return () => clearInterval(intervalRef.current);
+        playNotificationSound();
+
+        const notifBody = r.name + (r.note ? " — " + r.note : "");
+        if ("Notification" in window && Notification.permission === "granted") {
+          try {
+            new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
+          } catch (nErr) {
+            console.warn("Notification error:", nErr);
+          }
+        } else if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission().then((p) => {
+            if (p === "granted") {
+              new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
+            }
+          });
+        }
+      } catch (e) {
+        console.warn("Reminder fire error:", e);
+      }
+    };
+
+    const fireAll = () => { reminders.forEach(tryFire); };
+
+    fireAll();
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fireAll();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    intervalRef.current = setInterval(fireAll, 30000);
+
+    return () => {
+      clearInterval(intervalRef.current);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [user, reminders]);
 
   const addReminder = useCallback(async (data) => {
