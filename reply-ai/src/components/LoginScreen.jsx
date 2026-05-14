@@ -39,7 +39,7 @@ export default function LoginScreen() {
     <div className="login-screen">
       <div className="login-card">
         <div className="login-logo">💬</div>
-        <h1 className="login-title">Reply AI</h1>
+        <h1 className="login-title">Toolbox AI</h1>
         <p className="login-subtitle">
           {isRegister
             ? "Crea tu cuenta para empezar"
