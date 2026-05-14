@@ -34,7 +34,10 @@ service cloud.firestore {
     }
 
     match /reminders/{document} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.sharedWith != null && resource.data.sharedWith.hasAny([request.auth.token.email]))
+      );
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update: if request.auth != null
         && resource.data.userId == request.auth.uid

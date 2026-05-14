@@ -29,10 +29,12 @@ function firedToday(r) {
 
 const EMPTY_FORM = { name: "", note: "", frequency: "daily", hour: 8, minute: 0, weekday: 1, day: 1, month: 1 };
 
-export default function Reminders({ reminders, error, justFired, onAdd, onUpdate, onRemove }) {
+export default function Reminders({ reminders, error, justFired, userEmail, onAdd, onUpdate, onRemove, onShare, onUnshare }) {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [shareId, setShareId] = useState(null);
+  const [shareEmail, setShareEmail] = useState("");
 
   const set = (field, val) => setForm((f) => ({ ...f, [field]: val }));
 
@@ -73,6 +75,15 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
     setShowForm(false);
   };
 
+  const handleShare = (id) => {
+    if (!shareEmail.trim() || !shareEmail.includes("@")) return;
+    onShare(id, shareEmail.trim());
+    setShareEmail("");
+    setShareId(null);
+  };
+
+  const ownedCount = reminders.filter((r) => !r.isShared).length;
+
   const sorted = [...reminders].sort((a, b) => {
     if (a.active !== b.active) return a.active ? -1 : 1;
     return (a.hour || 0) - (b.hour || 0) || (a.minute || 0) - (b.minute || 0);
@@ -84,7 +95,7 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
 
       <div className="reminders-header">
         <h3>Recordatorios {reminders.length > 0 && <span className="count-badge">{reminders.length}</span>}</h3>
-        <button className="add-reminder-btn" onClick={openNew} disabled={reminders.length >= 5 && !editingId}>
+        <button className="add-reminder-btn" onClick={openNew} disabled={ownedCount >= 5 && !editingId}>
           + Añadir
         </button>
       </div>
@@ -155,20 +166,44 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
                 </div>
                 {r.note && <span className="reminder-item-note">{r.note}</span>}
                 <span className="reminder-item-time">{formatFireTime(r)}</span>
+                {r.isShared && r.ownerEmail && (
+                  <span className="reminder-shared-from">Compartido por {r.ownerEmail}</span>
+                )}
+                {!r.isShared && r.sharedWith && r.sharedWith.length > 0 && (
+                  <div className="reminder-shared-with">
+                    {r.sharedWith.map((em) => (
+                      <span key={em} className="reminder-shared-tag">
+                        {em}
+                        <button className="reminder-shared-remove" onClick={() => onUnshare(r.id, em)} title="Eliminar">✕</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="reminder-item-actions">
-                <button className={`reminder-toggle-btn ${r.active ? "on" : "off"}`} onClick={() => onUpdate(r.id, { active: !r.active })} title={r.active ? "Desactivar" : "Activar"}>
-                  {r.active ? "🔔" : "🔕"}
-                </button>
-                <button className="reminder-edit-btn" onClick={() => openEdit(r)} title="Editar">✏️</button>
-                <button className="reminder-delete-btn" onClick={() => onRemove(r.id)} title="Eliminar">🗑️</button>
+                {!r.isShared && (
+                  <>
+                    <button className={`reminder-toggle-btn ${r.active ? "on" : "off"}`} onClick={() => onUpdate(r.id, { active: !r.active })} title={r.active ? "Desactivar" : "Activar"}>
+                      {r.active ? "🔔" : "🔕"}
+                    </button>
+                    <button className="reminder-edit-btn" onClick={() => openEdit(r)} title="Editar">✏️</button>
+                    <button className="reminder-share-btn" onClick={() => setShareId(shareId === r.id ? null : r.id)} title="Compartir">📤</button>
+                    <button className="reminder-delete-btn" onClick={() => onRemove(r.id)} title="Eliminar">🗑️</button>
+                  </>
+                )}
               </div>
+              {shareId === r.id && !r.isShared && (
+                <div className="reminder-share-form fade-in">
+                  <input className="cf-input" type="email" placeholder="Email del usuario" value={shareEmail} onChange={(e) => setShareEmail(e.target.value)} />
+                  <button className="generate-btn" style={{ marginBottom: 0, padding: "8px 12px", fontSize: 13 }} onClick={() => handleShare(r.id)}>Compartir</button>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      {reminders.length >= 5 && !editingId && <p className="reminders-limit">Máximo 5 recordatorios permitidos.</p>}
+      {ownedCount >= 5 && !editingId && <p className="reminders-limit">Máximo 5 recordatorios propios permitidos.</p>}
     </div>
   );
 }

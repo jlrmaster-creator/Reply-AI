@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { subscribeReminders, addReminder as addSvc, updateReminder as updateSvc, removeReminder as removeSvc } from "../services/reminderService";
+import { subscribeReminders, subscribeSharedReminders, addReminder as addSvc, updateReminder as updateSvc, removeReminder as removeSvc, shareReminder as shareSvc, unshareReminder as unshareSvc } from "../services/reminderService";
 
 const MAX = 5;
 
@@ -79,10 +79,47 @@ export function useReminders() {
   useEffect(() => {
     if (!user) return;
     setError("");
-    const unsub = subscribeReminders(user.uid, setReminders, (err) => {
-      setError("Error al cargar recordatorios: " + getErrorMessage(err));
-    });
-    return unsub;
+
+    const mergeState = () => {
+      let combined = {};
+      let err = null;
+
+      const tryFlush = () => {
+        if (err) {
+          setError("Error al cargar recordatorios: " + getErrorMessage(err));
+          return;
+        }
+        const owned = combined._owned || [];
+        const shared = combined._shared || [];
+        const seen = new Set();
+        const merged = [];
+        for (const r of [...owned, ...shared]) {
+          if (!seen.has(r.id)) {
+            seen.add(r.id);
+            merged.push(r);
+          }
+        }
+        setReminders(merged);
+      };
+
+      const unsub1 = subscribeReminders(user.uid, (items) => {
+        combined._owned = items;
+        tryFlush();
+      }, (e) => { err = e; tryFlush(); });
+
+      const unsub2 = user.email ? subscribeSharedReminders(user.email, (items) => {
+        combined._shared = items;
+        tryFlush();
+      }, (e) => { err = e; tryFlush(); }) : null;
+
+      return () => {
+        unsub1();
+        if (unsub2) unsub2();
+      };
+    };
+
+    const cleanup = mergeState();
+    return cleanup;
   }, [user]);
 
   useEffect(() => {
@@ -95,6 +132,7 @@ export function useReminders() {
 
     intervalRef.current = setInterval(async () => {
       for (const r of reminders) {
+        if (r.isShared) continue;
         if (!shouldFireNow(r)) continue;
         const now = getNow();
         if (r.lastFiredAt) {
@@ -124,16 +162,17 @@ export function useReminders() {
   const addReminder = useCallback(async (data) => {
     if (!user) return;
     setError("");
-    if (reminders.length >= MAX) {
+    const ownedCount = reminders.filter((r) => !r.isShared).length;
+    if (ownedCount >= MAX) {
       setError(`Límite alcanzado: máximo ${MAX} recordatorios.`);
       return;
     }
     try {
-      await addSvc(data, user.uid);
+      await addSvc(data, user.uid, user.email);
     } catch (err) {
       setError("Error al añadir recordatorio: " + getErrorMessage(err));
     }
-  }, [user, reminders.length]);
+  }, [user, reminders]);
 
   const updateReminder = useCallback(async (id, data) => {
     setError("");
@@ -153,5 +192,27 @@ export function useReminders() {
     }
   }, []);
 
-  return { reminders, error, justFired, addReminder, updateReminder, removeReminder, firedToday, formatFireTime, getNextFire };
+  const shareReminder = useCallback(async (id, email) => {
+    setError("");
+    if (!email || !email.includes("@")) {
+      setError("Introduce un email válido.");
+      return;
+    }
+    try {
+      await shareSvc(id, email);
+    } catch (err) {
+      setError("Error al compartir recordatorio: " + getErrorMessage(err));
+    }
+  }, []);
+
+  const unshareReminder = useCallback(async (id, email) => {
+    setError("");
+    try {
+      await unshareSvc(id, email);
+    } catch (err) {
+      setError("Error al eliminar uso compartido: " + getErrorMessage(err));
+    }
+  }, []);
+
+  return { reminders, error, justFired, userEmail: user?.email, addReminder, updateReminder, removeReminder, shareReminder, unshareReminder, firedToday, formatFireTime, getNextFire };
 }

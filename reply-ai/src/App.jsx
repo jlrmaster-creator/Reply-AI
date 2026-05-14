@@ -149,7 +149,7 @@ function MainApp() {
         </div>
       ) : tab === "reminders" ? (
         <div className="tab-content">
-          <Reminders reminders={reminders.reminders} error={reminders.error} justFired={reminders.justFired} onAdd={reminders.addReminder} onUpdate={reminders.updateReminder} onRemove={reminders.removeReminder} />
+          <Reminders reminders={reminders.reminders} error={reminders.error} justFired={reminders.justFired} userEmail={reminders.userEmail} onAdd={reminders.addReminder} onUpdate={reminders.updateReminder} onRemove={reminders.removeReminder} onShare={reminders.shareReminder} onUnshare={reminders.unshareReminder} />
         </div>
       ) : (
         <div className="tab-content">

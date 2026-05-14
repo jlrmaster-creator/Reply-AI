@@ -1806,6 +1806,78 @@ textarea::placeholder {
   margin-top: 8px;
 }
 
+.reminder-share-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #cbd5e1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.reminder-share-btn:hover {
+  color: #2d6a4f;
+  background: #f0fdf4;
+}
+
+.reminder-share-form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.reminder-share-form .cf-input {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.reminder-shared-from {
+  font-size: 11px;
+  color: #6366f1;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.reminder-shared-with {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.reminder-shared-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.reminder-shared-remove {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.reminder-shared-remove:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
 @media (max-width: 420px) {
   .container {
     padding: 16px 10px;
