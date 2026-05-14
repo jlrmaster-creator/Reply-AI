@@ -12,12 +12,14 @@ import ResponseCard from "./components/ResponseCard";
 import Birthdays from "./components/Birthdays";
 import Contacts from "./components/Contacts";
 import Favorites from "./components/Favorites";
+import Converter from "./components/Converter";
 import "./App.css";
 
 const MENU_ITEMS = [
   { key: "reply", label: "Responder", icon: "💬" },
   { key: "birthdays", label: "Cumpleaños", icon: "🎂" },
   { key: "contacts", label: "Contactos", icon: "👥" },
+  { key: "converter", label: "Conversor", icon: "🔄" },
   { key: "favorites", label: "Favoritos", icon: "🔗" },
 ];
 
@@ -123,6 +125,10 @@ function MainApp() {
       ) : tab === "contacts" ? (
         <div className="tab-content">
           <Contacts contacts={contacts.contacts} error={contacts.error} onAdd={contacts.addContact} onRemove={contacts.removeContact} />
+        </div>
+      ) : tab === "converter" ? (
+        <div className="tab-content">
+          <Converter />
         </div>
       ) : (
         <div className="tab-content">

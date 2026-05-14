@@ -35,6 +35,21 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
     setShowForm(false);
   };
 
+  async function shareContact(c) {
+    const lines = [`*${c.name}*`];
+    if (c.phone) lines.push(`📞 ${c.phone}`);
+    if (c.email) lines.push(`✉️ ${c.email}`);
+    if (c.city) lines.push(`📍 ${c.city}`);
+    if (c.webpage) lines.push(`🌐 ${c.webpage}`);
+    if (c.occupation) lines.push(`💼 ${cap(c.occupation)}`);
+    lines.push(`⭐ ${'★'.repeat(c.rating)}${'☆'.repeat(5 - c.rating)}`);
+    const text = lines.join("\n");
+    if (navigator.share) {
+      try { await navigator.share({ title: c.name, text }); return; } catch {}
+    }
+    try { await navigator.clipboard.writeText(text); } catch {}
+  }
+
   const q = search.toLowerCase();
   const filtered = contacts.filter((c) => c.name.toLowerCase().includes(q));
 
@@ -141,6 +156,12 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
                           </svg>
                         </a>
                       )}
+                      <button className="contact-action-btn" onClick={() => shareContact(c)} title="Compartir">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                        </svg>
+                      </button>
                     </div>
                   )}
                 </div>

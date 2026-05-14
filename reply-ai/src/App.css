@@ -697,6 +697,14 @@ textarea::placeholder {
   background: #fef2f2;
 }
 
+.birthday-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
 .header-user {
   display: flex;
   align-items: center;
@@ -1065,6 +1073,91 @@ textarea::placeholder {
   padding: 12px 4px 6px;
 }
 
+/* ---- Converter ---- */
+.converter {
+  margin-top: 20px;
+}
+
+.conv-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.conv-cat {
+  padding: 8px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.conv-cat:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.conv-cat.active {
+  border-color: #2d6a4f;
+  background: #f0fdf4;
+  color: #2d6a4f;
+}
+
+.conv-form {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f5f9;
+}
+
+.conv-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.conv-row .cf-select {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.conv-arrow {
+  font-size: 18px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.conv-result {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f0fdf4;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+}
+
+.conv-result-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #2d6a4f;
+  display: block;
+}
+
+.conv-result-unit {
+  font-size: 13px;
+  color: #40916c;
+  margin-top: 2px;
+  display: block;
+}
+
 /* ---- Favorites ---- */
 .favorites {
   margin-top: 20px;
@@ -1166,6 +1259,33 @@ textarea::placeholder {
   white-space: nowrap;
 }
 
+.fav-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.fav-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fav-action-btn:hover {
+  background: #e2e8f0;
+  color: #2d6a4f;
+}
+
 .fav-item-delete {
   background: none;
   border: none;
@@ -1176,7 +1296,6 @@ textarea::placeholder {
   border-radius: 6px;
   transition: all 0.2s;
   flex-shrink: 0;
-  margin-left: 8px;
 }
 
 .fav-item-delete:hover {
