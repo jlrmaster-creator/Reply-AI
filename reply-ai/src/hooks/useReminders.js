@@ -133,6 +133,8 @@ export function useReminders() {
     const tryFire = async (r) => {
       if (r.isShared) return;
       if (!shouldFireToday(r)) return;
+      const startHour = r.earlyBird ? 7 : 9;
+      if (new Date().getHours() < startHour) return;
       if (r.lastFiredAt && Date.now() - new Date(r.lastFiredAt).getTime() < 3600000) return;
       try {
         await updateSvc(r.id, { lastFiredAt: new Date().toISOString() });
