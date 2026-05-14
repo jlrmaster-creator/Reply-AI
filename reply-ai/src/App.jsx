@@ -4,6 +4,7 @@ import { useReply } from "./hooks/useReply";
 import { useBirthdays } from "./hooks/useBirthdays";
 import { useContacts } from "./hooks/useContacts";
 import { useFavorites } from "./hooks/useFavorites";
+import { useReminders } from "./hooks/useReminders";
 import LoginScreen from "./components/LoginScreen";
 import InputBox from "./components/InputBox";
 import ModeSelector from "./components/ModeSelector";
@@ -14,6 +15,7 @@ import Contacts from "./components/Contacts";
 import Favorites from "./components/Favorites";
 import Converter from "./components/Converter";
 import Entertainment from "./components/Entertainment";
+import Reminders from "./components/Reminders";
 import "./App.css";
 
 const MENU_ITEMS = [
@@ -23,6 +25,7 @@ const MENU_ITEMS = [
   { key: "converter", label: "Conversor", icon: "🔄" },
   { key: "favorites", label: "Favoritos", icon: "🔗" },
   { key: "entertainment", label: "Entretenimiento", icon: "🎮" },
+  { key: "reminders", label: "Recordatorios", icon: "🔔" },
 ];
 
 function MainApp() {
@@ -35,6 +38,7 @@ function MainApp() {
   const birthdays = useBirthdays();
   const contacts = useContacts();
   const favorites = useFavorites();
+  const reminders = useReminders();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -142,6 +146,10 @@ function MainApp() {
       ) : tab === "entertainment" ? (
         <div className="tab-content">
           <Entertainment />
+        </div>
+      ) : tab === "reminders" ? (
+        <div className="tab-content">
+          <Reminders reminders={reminders.reminders} error={reminders.error} justFired={reminders.justFired} onAdd={reminders.addReminder} onUpdate={reminders.updateReminder} onRemove={reminders.removeReminder} />
         </div>
       ) : (
         <div className="tab-content">
