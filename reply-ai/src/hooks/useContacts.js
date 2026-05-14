@@ -1,0 +1,54 @@
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { subscribeContacts, addContact as addContactService, removeContact as removeContactService } from "../services/contactService";
+
+export function useContacts() {
+  const { user } = useAuth();
+  const [contacts, setContacts] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    setError("");
+    const unsubscribe = subscribeContacts(
+      user.uid,
+      (data) => {
+        setContacts(data);
+      },
+      (err) => {
+        setError("Error al cargar contactos: " + getErrorMessage(err));
+      }
+    );
+    return unsubscribe;
+  }, [user]);
+
+  const addContact = useCallback(async ({ name, phone, email, city, webpage, occupation, rating }) => {
+    if (!user) return;
+    setError("");
+    try {
+      await addContactService({ name, phone, email, city, webpage, occupation, rating }, user.uid);
+    } catch (err) {
+      setError("Error al añadir contacto: " + getErrorMessage(err));
+    }
+  }, [user]);
+
+  const removeContact = useCallback(async (id) => {
+    setError("");
+    try {
+      await removeContactService(id);
+    } catch (err) {
+      setError("Error al eliminar contacto: " + getErrorMessage(err));
+    }
+  }, []);
+
+  return { contacts, error, addContact, removeContact };
+}
+
+function getErrorMessage(err) {
+  if (!err) return "Error desconocido";
+  if (err.code === "permission-denied") return "Permiso denegado. Revisa las reglas de Firestore.";
+  if (err.code === "unavailable") return "Firestore no disponible.";
+  if (err.code === "not-found") return "No encontrado";
+  if (typeof err === "string") return err;
+  return err.message || "Error desconocido";
+}

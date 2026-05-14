@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { useReply } from "./hooks/useReply";
 import { useBirthdays } from "./hooks/useBirthdays";
+import { useContacts } from "./hooks/useContacts";
 import LoginScreen from "./components/LoginScreen";
 import InputBox from "./components/InputBox";
 import ModeSelector from "./components/ModeSelector";
 import GenerateButton from "./components/GenerateButton";
 import ResponseCard from "./components/ResponseCard";
 import Birthdays from "./components/Birthdays";
+import Contacts from "./components/Contacts";
 import "./App.css";
 
 function MainApp() {
@@ -16,6 +18,7 @@ function MainApp() {
 
   const reply = useReply();
   const birthdays = useBirthdays();
+  const contacts = useContacts();
 
   return (
     <div className="container">
@@ -52,6 +55,18 @@ function MainApp() {
               <circle cx="12" cy="7" r="4" />
             </svg>
             Cumpleaños
+          </button>
+          <button
+            className={`tab ${tab === "contacts" ? "active" : ""}`}
+            onClick={() => setTab("contacts")}
+          >
+            <svg className="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Contactos
           </button>
         </div>
       </header>
@@ -99,7 +114,7 @@ function MainApp() {
             </section>
           )}
         </div>
-      ) : (
+      ) : tab === "birthdays" ? (
         <div className="tab-content">
         <Birthdays
           friends={birthdays.friends}
@@ -110,6 +125,15 @@ function MainApp() {
           onSendGreeting={birthdays.sendGreeting}
           onSendReminder={birthdays.sendReminder}
         />
+        </div>
+      ) : (
+        <div className="tab-content">
+          <Contacts
+            contacts={contacts.contacts}
+            error={contacts.error}
+            onAdd={contacts.addContact}
+            onRemove={contacts.removeContact}
+          />
         </div>
       )}
 
