@@ -10,24 +10,19 @@ const FREQUENCIES = [
 const WEEKDAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
 function formatFireTime(r) {
-  const h = String(r.hour || 0).padStart(2, "0");
-  const m = String(r.minute || 0).padStart(2, "0");
-  let text = `${h}:${m}`;
-  if (r.frequency === "daily") text += " (a diario)";
-  else if (r.frequency === "weekly") text += ` (cada ${WEEKDAYS[r.weekday]})`;
-  else if (r.frequency === "monthly") text += ` (día ${r.day})`;
-  else if (r.frequency === "once") text += ` (${r.day}/${String(r.month).padStart(2, "0")})`;
-  return text;
+  if (r.frequency === "daily") return "A diario";
+  if (r.frequency === "weekly") return `Cada ${WEEKDAYS[r.weekday]}`;
+  if (r.frequency === "monthly") return `Día ${r.day} de cada mes`;
+  if (r.frequency === "once") return ` ${r.day}/${String(r.month).padStart(2, "0")}`;
+  return "";
 }
 
-function firedToday(r) {
+function firedRecently(r) {
   if (!r.lastFiredAt) return false;
-  const fired = new Date(r.lastFiredAt);
-  const now = new Date();
-  return fired.getDate() === now.getDate() && fired.getMonth() === now.getMonth() && fired.getFullYear() === now.getFullYear();
+  return Date.now() - new Date(r.lastFiredAt).getTime() < 3600000;
 }
 
-const EMPTY_FORM = { name: "", note: "", frequency: "daily", hour: 8, minute: 0, weekday: 1, day: 1, month: 1 };
+const EMPTY_FORM = { name: "", note: "", frequency: "daily", weekday: 1, day: 1, month: 1 };
 
 export default function Reminders({ reminders, error, justFired, onAdd, onUpdate, onRemove, onShare, onUnshare }) {
   const [form, setForm] = useState({ ...EMPTY_FORM });
@@ -45,7 +40,7 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
   };
 
   const openEdit = (r) => {
-    setForm({ name: r.name, note: r.note || "", frequency: r.frequency, hour: r.hour, minute: r.minute, weekday: r.weekday ?? 1, day: r.day ?? 1, month: r.month ?? 1 });
+    setForm({ name: r.name, note: r.note || "", frequency: r.frequency, weekday: r.weekday ?? 1, day: r.day ?? 1, month: r.month ?? 1 });
     setEditingId(r.id);
     setShowForm(true);
   };
@@ -57,8 +52,6 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
       name: form.name.trim(),
       note: form.note.trim(),
       frequency: form.frequency,
-      hour: form.hour,
-      minute: form.minute,
       active: true,
     };
     if (form.frequency === "weekly") data.weekday = form.weekday;
@@ -86,7 +79,7 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
 
   const sorted = [...reminders].sort((a, b) => {
     if (a.active !== b.active) return a.active ? -1 : 1;
-    return (a.hour || 0) - (b.hour || 0) || (a.minute || 0) - (b.minute || 0);
+    return a.name.localeCompare(b.name);
   });
 
   return (
@@ -108,17 +101,6 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
           <select className="cf-select" value={form.frequency} onChange={(e) => set("frequency", e.target.value)}>
             {FREQUENCIES.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
-
-          <div className="reminder-label">Hora:</div>
-          <div className="reminder-row">
-            <select className="cf-select" value={form.hour} onChange={(e) => set("hour", parseInt(e.target.value))}>
-              {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, "0")}</option>)}
-            </select>
-            <span className="reminder-colon">:</span>
-            <select className="cf-select" value={form.minute} onChange={(e) => set("minute", parseInt(e.target.value))}>
-              {Array.from({ length: 60 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, "0")}</option>)}
-            </select>
-          </div>
 
           {form.frequency === "weekly" && (
             <>
@@ -153,6 +135,8 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
             </>
           )}
 
+          <p className="reminder-form-hint">El aviso sonará cada hora hasta que lo desactives.</p>
+
           <div className="reminder-form-actions">
             <button type="button" className="reminder-cancel-btn" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancelar</button>
             <button className="generate-btn" type="submit" style={{ marginBottom: 0, flex: 1 }}>{editingId ? "Guardar cambios" : "Crear recordatorio"}</button>
@@ -166,16 +150,17 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
 
       <div className="reminders-list">
         {sorted.map((r) => {
-          const isFired = firedToday(r) || justFired === r.id;
+          const isFired = firedRecently(r) || justFired === r.id;
           return (
             <div key={r.id} className={`reminder-item fade-in ${isFired ? "fired" : ""} ${!r.active ? "inactive" : ""}`}>
               <div className="reminder-item-left">
                 <div className="reminder-item-header">
                   <span className="reminder-item-name">{r.name}</span>
-                  {isFired && <span className="reminder-fired-badge">✅ Hoy</span>}
+                  {isFired && <span className="reminder-fired-badge">✅ Ahora</span>}
                 </div>
                 {r.note && <span className="reminder-item-note">{r.note}</span>}
                 <span className="reminder-item-time">{formatFireTime(r)}</span>
+                {r.active && <span className="reminder-hourly-note">El aviso sonará cada hora hasta que lo desactives</span>}
                 {r.isShared && r.ownerEmail && (
                   <span className="reminder-shared-from">Compartido por {r.ownerEmail}</span>
                 )}

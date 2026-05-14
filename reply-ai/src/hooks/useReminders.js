@@ -56,10 +56,9 @@ function getNow() {
   return { h: d.getHours(), m: d.getMinutes(), dow: d.getDay(), day: d.getDate(), month: d.getMonth() + 1, dateStr: `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}` };
 }
 
-function shouldFireNow(r) {
+function shouldFireToday(r) {
   if (!r.active) return false;
   const now = getNow();
-  if (r.hour !== now.h || r.minute !== now.m) return false;
   if (r.frequency === "daily") return true;
   if (r.frequency === "weekly") return r.weekday === now.dow;
   if (r.frequency === "monthly") return r.day === now.day;
@@ -133,12 +132,8 @@ export function useReminders() {
 
     const tryFire = async (r) => {
       if (r.isShared) return;
-      if (!shouldFireNow(r)) return;
-      const now = getNow();
-      if (r.lastFiredAt) {
-        const fired = new Date(r.lastFiredAt);
-        if (fired.getDate() === now.day && fired.getMonth() + 1 === now.month && fired.getFullYear() === new Date().getFullYear()) return;
-      }
+      if (!shouldFireToday(r)) return;
+      if (r.lastFiredAt && Date.now() - new Date(r.lastFiredAt).getTime() < 3600000) return;
       try {
         await updateSvc(r.id, { lastFiredAt: new Date().toISOString() });
         setJustFired(r.id);
