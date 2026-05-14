@@ -11,6 +11,28 @@ function getErrorMessage(err) {
   return err.message || "Error desconocido";
 }
 
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const play = (freq, start, duration) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.3, start);
+      gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + duration);
+    };
+    const t = ctx.currentTime;
+    play(523, t, 0.15);
+    play(659, t + 0.15, 0.15);
+    play(784, t + 0.3, 0.3);
+  } catch {}
+}
+
 function getNow() {
   const d = new Date();
   return { h: d.getHours(), m: d.getMinutes(), dow: d.getDay(), day: d.getDate(), month: d.getMonth() + 1, dateStr: `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}` };
@@ -98,12 +120,11 @@ export function useReminders() {
           setJustFired(r.id);
           setTimeout(() => setJustFired(null), 5000);
 
+          playNotificationSound();
+
+          const notifBody = r.name + (r.note ? " — " + r.note : "");
           if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("🔔 Toolbox AI", {
-              body: r.name + (r.note ? " — " + r.note : ""),
-              icon: "./icons/icon-192.svg",
-              tag: r.id,
-            });
+            new Notification("🔔 Toolbox AI", { body: notifBody, icon: "./icons/icon-192.svg", tag: r.id });
           }
         } catch {}
       }
