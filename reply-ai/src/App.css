@@ -1651,6 +1651,14 @@ textarea::placeholder {
   color: #64748b;
 }
 
+.reminder-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 .reminder-form-actions {
   display: flex;
   gap: 8px;

@@ -109,6 +109,7 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
             {FREQUENCIES.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
           </select>
 
+          <div className="reminder-label">Hora:</div>
           <div className="reminder-row">
             <select className="cf-select" value={form.hour} onChange={(e) => set("hour", parseInt(e.target.value))}>
               {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, "0")}</option>)}
@@ -120,27 +121,36 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
           </div>
 
           {form.frequency === "weekly" && (
-            <select className="cf-select" value={form.weekday} onChange={(e) => set("weekday", parseInt(e.target.value))}>
-              {WEEKDAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
-            </select>
+            <>
+              <div className="reminder-label">Día de la semana:</div>
+              <select className="cf-select" value={form.weekday} onChange={(e) => set("weekday", parseInt(e.target.value))}>
+                {WEEKDAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
+              </select>
+            </>
           )}
 
           {form.frequency === "monthly" && (
-            <select className="cf-select" value={form.day} onChange={(e) => set("day", parseInt(e.target.value))}>
-              {Array.from({ length: 28 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
-            </select>
+            <>
+              <div className="reminder-label">Día del mes:</div>
+              <select className="cf-select" value={form.day} onChange={(e) => set("day", parseInt(e.target.value))}>
+                {Array.from({ length: 28 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+              </select>
+            </>
           )}
 
           {form.frequency === "once" && (
-            <div className="reminder-row">
-              <select className="cf-select" value={form.day} onChange={(e) => set("day", parseInt(e.target.value))}>
-                {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
-              </select>
-              <span className="reminder-colon">/</span>
-              <select className="cf-select" value={form.month} onChange={(e) => set("month", parseInt(e.target.value))}>
-                {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, "0")}</option>)}
-              </select>
-            </div>
+            <>
+              <div className="reminder-label">Día:</div>
+              <div className="reminder-row">
+                <select className="cf-select" value={form.day} onChange={(e) => set("day", parseInt(e.target.value))}>
+                  {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+                </select>
+                <span className="reminder-colon">/</span>
+                <select className="cf-select" value={form.month} onChange={(e) => set("month", parseInt(e.target.value))}>
+                  {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, "0")}</option>)}
+                </select>
+              </div>
+            </>
           )}
 
           <div className="reminder-form-actions">

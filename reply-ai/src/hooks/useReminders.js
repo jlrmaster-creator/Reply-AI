@@ -11,9 +11,24 @@ function getErrorMessage(err) {
   return err.message || "Error desconocido";
 }
 
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (audioCtx) return audioCtx;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch {}
+  return audioCtx;
+}
+
+document.addEventListener("click", () => { const c = getAudioCtx(); if (c?.state === "suspended") c.resume(); }, { once: true });
+document.addEventListener("touchstart", () => { const c = getAudioCtx(); if (c?.state === "suspended") c.resume(); }, { once: true });
+
 function playNotificationSound() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume();
     const play = (freq, start, duration) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
