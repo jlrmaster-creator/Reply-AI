@@ -123,8 +123,8 @@ function MainApp() {
                 </svg>
               </button>
             )}
-            <button className={`settings-header-btn ${tab === "config" ? "active" : ""}`} onClick={() => selectTab("config")} title="Configuración de Emisor" aria-label="Configuración de Emisor">
-              ⚙️ Configuración
+            <button className={`settings-header-btn ${tab === "config" ? "active" : ""}`} onClick={() => selectTab("config")} title="Configuración de Emisor" aria-label="Configuración de Emisor" style={{ fontSize: "16px", padding: "6px 10px" }}>
+              ⚙️
             </button>
           </div>
           <h1>Toolbox AI</h1>

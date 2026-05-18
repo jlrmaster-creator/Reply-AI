@@ -123,14 +123,28 @@ export default function FinanceTracker({
       let y = 52;
       doc.text(`Nombre: ${issuerName || "No especificado"}`, 14, y);
       if (issuerCIF) doc.text(`CIF/NIF: ${issuerCIF}`, 14, y += 6);
-      if (issuerAddress) doc.text(`Dirección: ${issuerAddress}`, 14, y += 6);
       
-      let locationParts = [];
-      if (userConfig?.city) locationParts.push(userConfig.city);
-      if (userConfig?.province) locationParts.push(userConfig.province);
-      if (userConfig?.postalCode) locationParts.push(`CP ${userConfig.postalCode}`);
-      if (locationParts.length > 0) {
-        doc.text(`Pob: ${locationParts.join(", ")}`, 14, y += 6);
+      let fullAddressParts = [];
+      if (issuerAddress) fullAddressParts.push(issuerAddress);
+      
+      let loc = [];
+      if (userConfig?.postalCode) loc.push(`CP ${userConfig.postalCode}`);
+      if (userConfig?.city) loc.push(userConfig.city);
+      if (userConfig?.province) loc.push(userConfig.province);
+      if (loc.length > 0) loc.push(""); // spacer or formatting
+      
+      // Filter out empty items
+      const cleanLoc = loc.filter(Boolean);
+      if (cleanLoc.length > 0) {
+        fullAddressParts.push(cleanLoc.join(" - "));
+      }
+      
+      const fullAddress = fullAddressParts.join(", ");
+      if (fullAddress) {
+        const wrappedAddress = doc.splitTextToSize(`Dirección: ${fullAddress}`, 85);
+        wrappedAddress.forEach((line) => {
+          doc.text(line, 14, y += 6);
+        });
       }
       
       if (issuerEmail) doc.text(`Email: ${issuerEmail}`, 14, y += 6);
@@ -148,7 +162,7 @@ export default function FinanceTracker({
       doc.text(`Nombre: ${receiverName || entry.clientOrProvider || "No especificado"}`, 110, y);
       if (receiverPhone) doc.text(`Teléfono: ${receiverPhone}`, 110, y += 6);
       if (receiverAddress) doc.text(`Dirección: ${receiverAddress}`, 110, y += 6);
-      if (receiverCity) doc.text(`Ciudad: ${receiverCity}`, 110, y += 6);
+      if (receiverCity) doc.text(`Población: ${receiverCity}`, 110, y += 6);
       if (receiverEmail) doc.text(`Email: ${receiverEmail}`, 110, y += 6);
 
       // Table Header
