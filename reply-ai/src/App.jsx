@@ -87,6 +87,13 @@ function MainApp() {
       <header>
         <div className="header-row">
           <div className="header-left" ref={menuRef}>
+            {tab !== "home" && (
+              <button className="back-btn" onClick={() => selectTab("home")} title="Volver al Inicio" aria-label="Volver al Inicio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+            )}
             <button className="hamburger-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menú">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -123,6 +130,18 @@ function MainApp() {
         </div>
         <div className="current-tab-label">{currentLabel}</div>
       </header>
+
+      {tab !== "home" && (
+        <div className="back-link-wrapper">
+          <button className="back-link-btn" onClick={() => selectTab("home")}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Volver al Menú Principal
+          </button>
+        </div>
+      )}
 
       {tab === "home" ? (
         <Dashboard userEmail={user.email} onSelectTab={selectTab} />

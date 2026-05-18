@@ -742,6 +742,40 @@ textarea::placeholder {
   color: #dc2626;
 }
 
+/* ---- App Shell & Fixed Layout ---- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  max-width: 440px;
+  margin: 0 auto;
+  background: transparent;
+  width: 100%;
+}
+
+/* Ensure direct children take full flex height and scroll internally if needed */
+.app-shell > :not(.app-footer) {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: #94a3b8;
+  background: transparent;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  width: 100%;
+  margin-top: auto;
+}
+
 /* ---- Login screen ---- */
 .loading-screen {
   display: flex;
@@ -3178,4 +3212,64 @@ textarea::placeholder {
   color: #2d6a4f;
   transform: translateX(0);
 }
+
+/* ---- Navigation Back Buttons ---- */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #2d6a4f;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
+  background: #eaf5f0;
+  transform: scale(1.06);
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.back-link-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.back-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2d6a4f;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: all 0.2s;
+}
+
+.back-link-btn:hover {
+  color: #40916c;
+  transform: translateX(-2px);
+}
+
+.back-link-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
 
