@@ -7,6 +7,7 @@ import { useFavorites } from "./hooks/useFavorites";
 import { useReminders } from "./hooks/useReminders";
 import { useNotes } from "./hooks/useNotes";
 import { useTime } from "./hooks/useTime";
+import { useFinance } from "./hooks/useFinance";
 import LoginScreen from "./components/LoginScreen";
 import InputBox from "./components/InputBox";
 import ModeSelector from "./components/ModeSelector";
@@ -20,6 +21,7 @@ import Entertainment from "./components/Entertainment";
 import Reminders from "./components/Reminders";
 import Notes from "./components/Notes";
 import TimeTracker from "./components/TimeTracker";
+import FinanceTracker from "./components/FinanceTracker";
 import "./App.css";
 
 const MENU_ITEMS = [
@@ -32,6 +34,7 @@ const MENU_ITEMS = [
   { key: "reminders", label: "Recordatorios", icon: "🔔" },
   { key: "notes", label: "Notas", icon: "📝" },
   { key: "time", label: "Control de Horas", icon: "⏱️" },
+  { key: "finance", label: "Contabilidad", icon: "💰" },
 ];
 
 function MainApp() {
@@ -47,6 +50,7 @@ function MainApp() {
   const reminders = useReminders();
   const notesHook = useNotes();
   const timeHook = useTime();
+  const financeHook = useFinance();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -178,6 +182,17 @@ function MainApp() {
             onStartTimer={timeHook.startTimer}
             onStopTimer={timeHook.stopTimer}
             onRemoveEntry={timeHook.removeEntry}
+          />
+        </div>
+      ) : tab === "finance" ? (
+        <div className="tab-content">
+          <FinanceTracker
+            entries={financeHook.entries}
+            error={financeHook.error}
+            maxEntries={financeHook.maxEntries}
+            stats={financeHook.stats}
+            onAddEntry={financeHook.addEntry}
+            onRemoveEntry={financeHook.removeEntry}
           />
         </div>
       ) : (
