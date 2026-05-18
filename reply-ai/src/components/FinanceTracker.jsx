@@ -36,11 +36,19 @@ export default function FinanceTracker({
   stats,
   onAddEntry,
   onRemoveEntry,
+  contacts = [],
 }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [filterQuarter, setFilterQuarter] = useState("ALL");
   const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString());
+
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestions = useMemo(() => {
+    const query = (form.clientOrProvider || "").trim().toLowerCase();
+    if (!query) return [];
+    return contacts.filter((c) => c.name.toLowerCase().includes(query));
+  }, [contacts, form.clientOrProvider]);
 
   const set = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
 
@@ -278,14 +286,38 @@ export default function FinanceTracker({
             maxLength={100}
           />
 
-          <input
-            className="cf-input"
-            type="text"
-            placeholder={form.type === "income" ? "Cliente (ej: ACME S.L.)" : "Proveedor (ej: Iberdrola)"}
-            value={form.clientOrProvider}
-            onChange={(e) => set("clientOrProvider", e.target.value)}
-            maxLength={100}
-          />
+          <div className="autocomplete-wrapper">
+            <input
+              className="cf-input"
+              type="text"
+              placeholder={form.type === "income" ? "Cliente (ej: ACME S.L.)" : "Proveedor (ej: Iberdrola)"}
+              value={form.clientOrProvider}
+              onChange={(e) => {
+                set("clientOrProvider", e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              maxLength={100}
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="autocomplete-suggestions">
+                {suggestions.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="autocomplete-suggestion"
+                    onClick={() => {
+                      set("clientOrProvider", c.name);
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    👤 {c.name} {c.occupation ? `(${c.occupation})` : ""}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="reminder-row">
             <input

@@ -24,9 +24,11 @@ import Notes from "./components/Notes";
 import TimeTracker from "./components/TimeTracker";
 import FinanceTracker from "./components/FinanceTracker";
 import TaskList from "./components/TaskList";
+import Dashboard from "./components/Dashboard";
 import "./App.css";
 
 const MENU_ITEMS = [
+  { key: "home", label: "Inicio", icon: "🏠" },
   { key: "reply", label: "Responder", icon: "💬" },
   { key: "birthdays", label: "Cumpleaños", icon: "🎂" },
   { key: "contacts", label: "Contactos", icon: "👥" },
@@ -41,7 +43,7 @@ const MENU_ITEMS = [
 ];
 
 function MainApp() {
-  const [tab, setTab] = useState("reply");
+  const [tab, setTab] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const { user, logout } = useAuth();
@@ -122,7 +124,9 @@ function MainApp() {
         <div className="current-tab-label">{currentLabel}</div>
       </header>
 
-      {tab === "reply" ? (
+      {tab === "home" ? (
+        <Dashboard userEmail={user.email} onSelectTab={selectTab} />
+      ) : tab === "reply" ? (
         <div className="tab-content">
           <InputBox value={reply.message} onChange={(e) => reply.setMessage(e.target.value)} />
           <ModeSelector selected={reply.mode} onSelect={reply.setMode} />
@@ -186,6 +190,7 @@ function MainApp() {
             onStartTimer={timeHook.startTimer}
             onStopTimer={timeHook.stopTimer}
             onRemoveEntry={timeHook.removeEntry}
+            contacts={contacts.contacts}
           />
         </div>
       ) : tab === "finance" ? (
@@ -197,6 +202,7 @@ function MainApp() {
             stats={financeHook.stats}
             onAddEntry={financeHook.addEntry}
             onRemoveEntry={financeHook.removeEntry}
+            contacts={contacts.contacts}
           />
         </div>
       ) : tab === "tasks" ? (

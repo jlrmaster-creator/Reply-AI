@@ -36,6 +36,7 @@ export default function TimeTracker({
   projects, entries, error, maxProjects,
   activeProjectId, elapsed, secondsByProject,
   onAddProject, onRemoveProject, onStartTimer, onStopTimer, onRemoveEntry,
+  contacts = [],
 }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_PROJ });
@@ -43,6 +44,13 @@ export default function TimeTracker({
   const [showStopModal, setShowStopModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null); // for history filter
   const [confirmDelete, setConfirmDelete] = useState(null);
+
+  const [showClientSuggestions, setShowClientSuggestions] = useState(false);
+  const clientSuggestions = React.useMemo(() => {
+    const query = (form.clientName || "").trim().toLowerCase();
+    if (!query) return [];
+    return contacts.filter((c) => c.name.toLowerCase().includes(query));
+  }, [contacts, form.clientName]);
 
   const set = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
 
@@ -149,13 +157,37 @@ export default function TimeTracker({
             onChange={(e) => set("name", e.target.value)}
             required
           />
-          <input
-            className="cf-input"
-            type="text"
-            placeholder="Cliente (opcional)"
-            value={form.clientName}
-            onChange={(e) => set("clientName", e.target.value)}
-          />
+          <div className="autocomplete-wrapper">
+            <input
+              className="cf-input"
+              type="text"
+              placeholder="Cliente (opcional)"
+              value={form.clientName}
+              onChange={(e) => {
+                set("clientName", e.target.value);
+                setShowClientSuggestions(true);
+              }}
+              onFocus={() => setShowClientSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowClientSuggestions(false), 200)}
+            />
+            {showClientSuggestions && clientSuggestions.length > 0 && (
+              <div className="autocomplete-suggestions">
+                {clientSuggestions.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="autocomplete-suggestion"
+                    onClick={() => {
+                      set("clientName", c.name);
+                      setShowClientSuggestions(false);
+                    }}
+                  >
+                    👤 {c.name} {c.occupation ? `(${c.occupation})` : ""}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="time-rate-row">
             <input
               className="cf-input"
