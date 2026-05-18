@@ -41,6 +41,7 @@ export async function addFinanceEntry({
   vatRate, // e.g. 21, 10, 4, 0
   irpfRate, // e.g. 15, 7, 0
   date,
+  conceptsList = [],
 }, userId) {
   const baseAmount = parseFloat(amount) || 0;
   const vRate = parseFloat(vatRate) || 0;
@@ -66,6 +67,7 @@ export async function addFinanceEntry({
     irpfAmount,
     total,
     date, // YYYY-MM-DD
+    conceptsList: conceptsList || [],
     userId,
     createdAt: new Date().toISOString(),
   };

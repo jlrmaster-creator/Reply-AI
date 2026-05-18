@@ -6,12 +6,11 @@ const IRPF_RATES = [0, 7, 15];
 
 const EMPTY_FORM = {
   type: "income",
-  concept: "",
   clientOrProvider: "",
-  amount: "",
   vatRate: 21,
   irpfRate: 0,
   date: new Date().toISOString().split("T")[0],
+  conceptsList: [{ id: 1, name: "", amount: "" }],
 };
 
 function fmtMoney(amount, currency = "EUR") {
@@ -99,7 +98,7 @@ export default function FinanceTracker({
       doc.setTextColor(...darkGrey);
       doc.text(`Fecha: ${new Date(entry.date).toLocaleDateString("es-ES")}`, 140, 20);
       doc.text(`Nº Asiento: FT-${entry.id.substring(0, 6).toUpperCase()}`, 140, 25);
-      doc.text(`Tipo: ${entry.type === "income" ? "Factura Emitida" : "Factura Recibida"}`, 140, 30);
+      doc.text("Tipo: Albarán", 140, 30);
 
       // Divider
       doc.setDrawColor(226, 232, 240);
@@ -154,24 +153,46 @@ export default function FinanceTracker({
       doc.text("TOTAL", 175, y + 5.5);
 
       // Table Row
-      doc.setFillColor(...lightGrey);
-      doc.rect(14, y + 8, 182, 12, "F");
+      const listToRender = (entry.conceptsList && entry.conceptsList.length > 0)
+        ? entry.conceptsList
+        : [{ id: 1, name: entry.concept, amount: entry.amount }];
 
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9.5);
-      doc.setTextColor(...textColor);
-      
-      const conceptText = entry.concept.length > 35 ? entry.concept.substring(0, 32) + "..." : entry.concept;
-      doc.text(conceptText, 18, y + 15.5);
-      doc.text(fmtMoney(entry.amount), 90, y + 15.5);
-      doc.text(`${entry.vatRate}% (${fmtMoney(entry.vatAmount)})`, 120, y + 15.5);
-      if (entry.type === "income") {
-        doc.text(`${entry.irpfRate}% (-${fmtMoney(entry.irpfAmount)})`, 145, y + 15.5);
-      }
-      doc.text(fmtMoney(entry.total), 175, y + 15.5);
+      listToRender.forEach((item, index) => {
+        const rowY = y + 8 + (index * 10);
+        // Zebra striping
+        if (index % 2 === 0) {
+          doc.setFillColor(...lightGrey);
+        } else {
+          doc.setFillColor(255, 255, 255);
+        }
+        doc.rect(14, rowY, 182, 10, "F");
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(...textColor);
+
+        const nameText = item.name.length > 35 ? item.name.substring(0, 32) + "..." : item.name;
+        const itemAmount = parseFloat(item.amount) || 0;
+        
+        // Proportional taxes
+        const lineVat = parseFloat(((itemAmount * entry.vatRate) / 100).toFixed(2));
+        const lineIrpf = entry.type === "income" ? parseFloat(((itemAmount * entry.irpfRate) / 100).toFixed(2)) : 0;
+        const lineTotal = entry.type === "income" ? (itemAmount + lineVat - lineIrpf) : (itemAmount + lineVat);
+
+        doc.text(nameText, 18, rowY + 6.5);
+        doc.text(fmtMoney(itemAmount), 90, rowY + 6.5);
+        doc.text(`${entry.vatRate}% (${fmtMoney(lineVat)})`, 120, rowY + 6.5);
+        if (entry.type === "income") {
+          doc.text(`${entry.irpfRate}% (-${fmtMoney(lineIrpf)})`, 145, rowY + 6.5);
+        }
+        doc.text(fmtMoney(lineTotal), 175, rowY + 6.5);
+      });
+
+      // Adjust y position to end of table
+      y += 8 + (listToRender.length * 10);
 
       // Summary Box
-      y += 30;
+      y += 10;
       doc.setDrawColor(...primaryColor);
       doc.setLineWidth(0.5);
       doc.line(120, y, 196, y);
@@ -246,21 +267,61 @@ export default function FinanceTracker({
 
   const set = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
 
+  const addConceptField = () => {
+    if (form.conceptsList.length >= 5) return;
+    setForm((prev) => ({
+      ...prev,
+      conceptsList: [...prev.conceptsList, { id: Date.now(), name: "", amount: "" }],
+    }));
+  };
+
+  const removeConceptField = (id) => {
+    if (form.conceptsList.length <= 1) return;
+    setForm((prev) => ({
+      ...prev,
+      conceptsList: prev.conceptsList.filter((item) => item.id !== id),
+    }));
+  };
+
+  const updateConceptField = (id, field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      conceptsList: prev.conceptsList.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.concept.trim() || !form.amount) return;
+
+    const validConcepts = form.conceptsList.filter((c) => c.name.trim() !== "");
+    if (validConcepts.length === 0) return;
+
+    const totalBaseAmount = validConcepts.reduce(
+      (sum, item) => sum + (parseFloat(item.amount) || 0),
+      0
+    );
+    if (totalBaseAmount <= 0) return;
+
+    const concatenatedConcept = validConcepts.map((item) => item.name.trim()).join(" + ");
 
     onAddEntry({
       type: form.type,
-      concept: form.concept.trim(),
+      concept: concatenatedConcept,
       clientOrProvider: form.clientOrProvider.trim(),
-      amount: parseFloat(form.amount) || 0,
+      amount: totalBaseAmount,
       vatRate: parseInt(form.vatRate) || 0,
       irpfRate: form.type === "income" ? parseInt(form.irpfRate) || 0 : 0,
       date: form.date,
+      conceptsList: validConcepts,
     });
 
-    setForm({ ...EMPTY_FORM, type: form.type }); // maintain type
+    setForm({
+      ...EMPTY_FORM,
+      type: form.type,
+      date: new Date().toISOString().split("T")[0],
+    });
     setShowForm(false);
   };
 
@@ -470,16 +531,6 @@ export default function FinanceTracker({
             />
           </div>
 
-          <input
-            className="cf-input"
-            type="text"
-            placeholder="Concepto (ej: Servicio consultoría, Alquiler local...)"
-            value={form.concept}
-            onChange={(e) => set("concept", e.target.value)}
-            required
-            maxLength={100}
-          />
-
           <div className="autocomplete-wrapper">
             <input
               className="cf-input"
@@ -513,18 +564,63 @@ export default function FinanceTracker({
             )}
           </div>
 
-          <div className="reminder-row">
-            <input
-              className="cf-input"
-              type="number"
-              min="0.01"
-              step="0.01"
-              placeholder="Base imponible (€) *"
-              value={form.amount}
-              onChange={(e) => set("amount", e.target.value)}
-              required
-              style={{ flex: 1 }}
-            />
+          {/* Dynamic concepts list (up to 5) */}
+          <div className="concepts-list-container">
+            <span className="reminder-label" style={{ display: 'block', textAlign: 'left', marginBottom: '8px' }}>
+              Conceptos y Bases Imponibles (Hasta 5):
+            </span>
+            {form.conceptsList.map((item, index) => (
+              <div key={item.id} className="concept-row fade-in">
+                <input
+                  className="cf-input concept-name-input"
+                  type="text"
+                  placeholder={`Concepto #${index + 1} *`}
+                  value={item.name}
+                  onChange={(e) => updateConceptField(item.id, "name", e.target.value)}
+                  required={index === 0}
+                  maxLength={100}
+                  style={{ flex: 2 }}
+                />
+                <input
+                  className="cf-input concept-amount-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Base (€) *"
+                  value={item.amount}
+                  onChange={(e) => updateConceptField(item.id, "amount", e.target.value)}
+                  required={index === 0}
+                  style={{ flex: 1 }}
+                />
+                <div className="concept-row-actions">
+                  {index === form.conceptsList.length - 1 && form.conceptsList.length < 5 && (
+                    <button
+                      type="button"
+                      className="concept-row-btn add"
+                      onClick={addConceptField}
+                      title="Añadir concepto (+)"
+                    >
+                      ➕
+                    </button>
+                  )}
+                  {form.conceptsList.length > 1 && (
+                    <button
+                      type="button"
+                      className="concept-row-btn remove"
+                      onClick={() => removeConceptField(item.id)}
+                      title="Eliminar concepto (-)"
+                    >
+                      ❌
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+            
+            {/* Show dynamic sum */}
+            <div className="concepts-total-badge">
+              Total Base Imponible: <strong>{fmtMoney(form.conceptsList.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0))}</strong>
+            </div>
           </div>
 
           <div className="finance-tax-selectors">

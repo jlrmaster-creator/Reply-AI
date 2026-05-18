@@ -17,7 +17,7 @@ export function subscribeContacts(userId, callback, onError) {
   });
 }
 
-export async function addContact({ name, phone, email, city, webpage, occupation, rating, address }, userId) {
+export async function addContact({ name, phone, email, city, webpage, occupation, rating, address, nif }, userId) {
   const data = {
     name,
     phone: phone || "",
@@ -27,6 +27,7 @@ export async function addContact({ name, phone, email, city, webpage, occupation
     occupation: occupation || "",
     rating: rating || 1,
     address: address || "",
+    nif: nif || "",
     userId,
     createdAt: new Date().toISOString(),
   };

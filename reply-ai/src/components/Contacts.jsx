@@ -13,6 +13,7 @@ function cap(str) {
 
 export default function Contacts({ contacts, error, onAdd, onRemove }) {
   const [name, setName] = useState("");
+  const [nif, setNif] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
@@ -30,6 +31,7 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
     const finalOccupation = occupation === "otros" ? customOccupation.trim().toLowerCase() : occupation;
     onAdd({
       name: name.trim(),
+      nif: nif.trim(),
       phone: phone.trim(),
       email: email.trim(),
       city: city.trim(),
@@ -39,6 +41,7 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
       rating
     });
     setName("");
+    setNif("");
     setPhone("");
     setEmail("");
     setCity("");
@@ -52,6 +55,7 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
 
   async function shareContact(c) {
     const lines = [`*${c.name}*`];
+    if (c.nif) lines.push(`🆔 NIF/CIF: ${c.nif}`);
     if (c.phone) lines.push(`📞 ${c.phone}`);
     if (c.email) lines.push(`✉️ ${c.email}`);
     if (c.city) lines.push(`📍 ${c.city}`);
@@ -96,6 +100,7 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
       {showForm && (
         <form className="contact-form fade-in" onSubmit={handleSubmit}>
           <input className="cf-input" type="text" placeholder="Nombre *" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input className="cf-input" type="text" placeholder="NIF / CIF (ej: 12345678Z)" value={nif} onChange={(e) => setNif(e.target.value)} />
           <input className="cf-input" type="tel" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} />
           <input className="cf-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input className="cf-input" type="text" placeholder="Ciudad" value={city} onChange={(e) => setCity(e.target.value)} />
@@ -160,6 +165,7 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
                 <div className="contact-item-info">
                   <span className="contact-item-name">{c.name}</span>
                   <div className="contact-item-details">
+                    {c.nif && <span>🆔 NIF/CIF: {c.nif}</span>}
                     {c.phone && <span>📞 {c.phone}</span>}
                     {c.email && <span>✉️ {c.email}</span>}
                     {c.city && <span>📍 {c.city}</span>}

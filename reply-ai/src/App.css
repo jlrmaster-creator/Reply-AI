@@ -3665,6 +3665,74 @@ textarea::placeholder {
   color: #92400e;
 }
 
+/* ---- Dynamic Concepts Form List ---- */
+.concepts-list-container {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.concept-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.concept-row .cf-input {
+  margin-bottom: 0 !important;
+}
+
+.concept-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.concept-row-btn {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.concept-row-btn.add:hover {
+  background: #2d6a4f;
+  border-color: #2d6a4f;
+  transform: scale(1.1);
+}
+
+.concept-row-btn.remove:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  transform: scale(1.1);
+}
+
+.concepts-total-badge {
+  background: #eaf5f0;
+  border: 1px solid #cce3d8;
+  border-radius: 8px;
+  color: #2d6a4f;
+  font-size: 11.5px;
+  padding: 8px 12px;
+  margin-top: 6px;
+  text-align: right;
+  align-self: flex-end;
+}
+
 
 
 
