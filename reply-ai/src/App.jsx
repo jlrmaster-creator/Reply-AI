@@ -5,6 +5,7 @@ import { useBirthdays } from "./hooks/useBirthdays";
 import { useContacts } from "./hooks/useContacts";
 import { useFavorites } from "./hooks/useFavorites";
 import { useReminders } from "./hooks/useReminders";
+import { useNotes } from "./hooks/useNotes";
 import LoginScreen from "./components/LoginScreen";
 import InputBox from "./components/InputBox";
 import ModeSelector from "./components/ModeSelector";
@@ -16,6 +17,7 @@ import Favorites from "./components/Favorites";
 import Converter from "./components/Converter";
 import Entertainment from "./components/Entertainment";
 import Reminders from "./components/Reminders";
+import Notes from "./components/Notes";
 import "./App.css";
 
 const MENU_ITEMS = [
@@ -26,6 +28,7 @@ const MENU_ITEMS = [
   { key: "favorites", label: "Favoritos", icon: "🔗" },
   { key: "entertainment", label: "Entretenimiento", icon: "🎮" },
   { key: "reminders", label: "Recordatorios", icon: "🔔" },
+  { key: "notes", label: "Notas", icon: "📝" },
 ];
 
 function MainApp() {
@@ -39,6 +42,7 @@ function MainApp() {
   const contacts = useContacts();
   const favorites = useFavorites();
   const reminders = useReminders();
+  const notesHook = useNotes();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -150,6 +154,10 @@ function MainApp() {
       ) : tab === "reminders" ? (
         <div className="tab-content">
           <Reminders reminders={reminders.reminders} error={reminders.error} justFired={reminders.justFired} userEmail={reminders.userEmail} onAdd={reminders.addReminder} onUpdate={reminders.updateReminder} onRemove={reminders.removeReminder} onShare={reminders.shareReminder} onUnshare={reminders.unshareReminder} />
+        </div>
+      ) : tab === "notes" ? (
+        <div className="tab-content">
+          <Notes notes={notesHook.notes} error={notesHook.error} maxNotes={notesHook.maxNotes} onAdd={notesHook.addNote} onUpdate={notesHook.updateNote} onRemove={notesHook.removeNote} onTogglePin={notesHook.togglePin} />
         </div>
       ) : (
         <div className="tab-content">
