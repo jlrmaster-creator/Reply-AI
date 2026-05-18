@@ -2489,6 +2489,262 @@ textarea::placeholder {
 .finance-item-total.income { color: #10b981; }
 .finance-item-total.expense { color: #ef4444; }
 
+/* ---- Tasks & To-Do ---- */
+.task-list-section {
+  margin-top: 12px;
+}
+
+.task-overview {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #1e3a8a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+/* Custom Search Box */
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 12px;
+  height: 40px;
+  transition: all 0.2s;
+}
+
+.search-box:focus-within {
+  border-color: #2d6a4f;
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+}
+
+.search-icon {
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  color: #1a1a2e;
+}
+
+.search-clear {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 11px;
+}
+
+/* Priority toggler in form */
+.task-priority-toggle {
+  display: flex;
+  gap: 6px;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.priority-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #64748b;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.priority-btn.active {
+  background: var(--active-bg);
+  color: var(--active-color);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Tasks Container & Items */
+.tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid #f1f5f9;
+  transition: all 0.2s;
+}
+
+.task-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.task-item.completed {
+  background: #f8fafc;
+  opacity: 0.7;
+}
+
+/* Circular Checkbox */
+.task-checkbox-container {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.task-checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.task-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.task-checkbox-container:hover input ~ .task-checkmark {
+  border-color: #2d6a4f;
+  background-color: #f0fdf4;
+}
+
+.task-checkbox-container input:checked ~ .task-checkmark {
+  background-color: #2d6a4f;
+  border-color: #2d6a4f;
+}
+
+.task-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.task-checkbox-container input:checked ~ .task-checkmark:after {
+  display: block;
+}
+
+.task-checkbox-container .task-checkmark:after {
+  left: 6px;
+  top: 3px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Task Body */
+.task-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1a1a2e;
+  transition: all 0.2s;
+  line-height: 1.3;
+}
+
+.task-item.completed .task-title {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.task-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* Badges */
+.task-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.task-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.task-badge.client {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.task-badge.date {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.task-badge.date.overdue {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.task-badge.priority {
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 /* ---- Notes ---- */
 
 .notes {
