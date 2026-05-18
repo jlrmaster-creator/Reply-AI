@@ -98,6 +98,12 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
     <div className="reminders">
       {error && <p className="error">{error}</p>}
 
+      {Notification.permission === "denied" && (
+        <div className="notification-warning-banner fade-in">
+          ⚠️ <strong>Notificaciones desactivadas:</strong> Habilita los permisos de notificación de esta web en tu navegador para escuchar los avisos sonoros y visuales en segundo plano.
+        </div>
+      )}
+
       <div className="reminders-header">
         <h3>Recordatorios {reminders.length > 0 && <span className="count-badge">{reminders.length}</span>}</h3>
         <button className="add-reminder-btn" onClick={openNew} disabled={ownedCount >= 5 && !editingId}>

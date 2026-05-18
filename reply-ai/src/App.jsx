@@ -79,11 +79,27 @@ function MainApp() {
     setMenuOpen(false);
   };
 
+  const activeReminder = reminders.justFired
+    ? reminders.reminders.find((r) => r.id === reminders.justFired)
+    : null;
+
   const currentItem = MENU_ITEMS.find((m) => m.key === tab);
   const currentLabel = currentItem && !currentItem.url ? currentItem.label : "";
 
   return (
     <div className="container">
+      {activeReminder && (
+        <div className="global-toast-notification fade-in">
+          <div className="toast-icon-wrapper">
+            <span className="toast-icon-bell animate-ring">🔔</span>
+          </div>
+          <div className="toast-body">
+            <h4 className="toast-title">{activeReminder.name}</h4>
+            {activeReminder.note && <p className="toast-desc">{activeReminder.note}</p>}
+          </div>
+          <button className="toast-close-btn" onClick={() => reminders.setJustFired(null)} title="Cerrar">✕</button>
+        </div>
+      )}
       <header>
         <div className="header-row">
           <div className="header-left" ref={menuRef}>

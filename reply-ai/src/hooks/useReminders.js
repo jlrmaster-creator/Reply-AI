@@ -137,12 +137,28 @@ function showNativeNotification(reminder) {
   if (Notification.permission !== "granted") return;
   try {
     const body = reminder.name + (reminder.note ? " — " + reminder.note : "");
-    new Notification("🔔 Toolbox AI", {
-      body,
-      icon: "./icons/icon-192.svg",
-      tag: reminder.id,
-      renotify: true,          // force re-notify even if same tag
-    });
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.showNotification("🔔 Toolbox AI", {
+          body,
+          icon: "./icons/icon-192.svg",
+          badge: "./icons/icon-192.svg",
+          tag: reminder.id,
+          renotify: true,
+          vibrate: [200, 100, 200],
+        });
+      }).catch((err) => {
+        console.warn("SW notification failed, falling back:", err);
+        new Notification("🔔 Toolbox AI", { body, icon: "./icons/icon-192.svg", tag: reminder.id, renotify: true });
+      });
+    } else {
+      new Notification("🔔 Toolbox AI", {
+        body,
+        icon: "./icons/icon-192.svg",
+        tag: reminder.id,
+        renotify: true,
+      });
+    }
   } catch (e) {
     console.warn("Notification error:", e);
   }
@@ -288,7 +304,11 @@ export function useReminders() {
   const updateReminder = useCallback(async (id, data) => {
     setError("");
     try {
-      await updateSvc(id, data);
+      const merged = { ...data };
+      if (merged.active === true) {
+        merged.lastFiredAt = null;
+      }
+      await updateSvc(id, merged);
     } catch (err) {
       setError("Error al actualizar recordatorio: " + getErrorMessage(err));
     }
@@ -338,6 +358,7 @@ export function useReminders() {
     reminders,
     error,
     justFired,
+    setJustFired,
     userEmail: user?.email,
     addReminder,
     updateReminder,

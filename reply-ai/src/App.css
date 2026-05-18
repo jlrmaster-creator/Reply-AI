@@ -3272,4 +3272,120 @@ textarea::placeholder {
   height: 15px;
 }
 
+/* ---- Floating Toast & Notification Warning Banner ---- */
+.global-toast-notification {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border: 2px solid #2d6a4f;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+  animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast-icon-wrapper {
+  background: #eaf5f0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-icon-bell {
+  font-size: 18px;
+  display: inline-block;
+}
+
+.animate-ring {
+  animation: ringBell 1.2s ease infinite;
+}
+
+@keyframes ringBell {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(15deg); }
+  30% { transform: rotate(-15deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-10deg); }
+  75% { transform: rotate(4deg); }
+  85% { transform: rotate(-4deg); }
+}
+
+.toast-body {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0 0 1px 0;
+}
+
+.toast-desc {
+  font-size: 11px;
+  color: #475569;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.toast-close-btn:hover {
+  color: #dc2626;
+}
+
+.notification-warning-banner {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  color: #b45309;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.notification-warning-banner strong {
+  color: #92400e;
+}
+
+
 
