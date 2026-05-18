@@ -51,12 +51,16 @@ export async function removeProject(id) {
 export function subscribeEntries(userId, callback, onError) {
   const q = query(
     collection(db, ENTRIES_COL),
-    where("userId", "==", userId),
-    orderBy("startedAt", "desc")
+    where("userId", "==", userId)
   );
   return onSnapshot(
     q,
-    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    (snap) => {
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // Sort in memory by startedAt desc
+      items.sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+      callback(items);
+    },
     (err) => { console.error("entries subscribe error:", err); if (onError) onError(err); }
   );
 }

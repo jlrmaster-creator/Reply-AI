@@ -16,12 +16,16 @@ const COLLECTION = "finances";
 export function subscribeFinances(userId, callback, onError) {
   const q = query(
     collection(db, COLLECTION),
-    where("userId", "==", userId),
-    orderBy("date", "desc")
+    where("userId", "==", userId)
   );
   return onSnapshot(
     q,
-    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    (snap) => {
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // Sort in memory by date desc
+      items.sort((a, b) => new Date(b.date) - new Date(a.date));
+      callback(items);
+    },
     (err) => {
       console.error("finances subscribe error:", err);
       if (onError) onError(err);
