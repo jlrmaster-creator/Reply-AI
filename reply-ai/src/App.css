@@ -1923,7 +1923,340 @@ textarea::placeholder {
   background: #fef2f2;
 }
 
+/* ---- Time Tracker ---- */
+.time-tracker {
+  margin-top: 12px;
+}
+
+.time-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.time-section-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Live timer banner */
+.timer-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 2px solid #2d6a4f;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.timer-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timer-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+.timer-project-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.timer-client {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.timer-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.timer-elapsed {
+  font-size: 20px;
+  font-weight: 800;
+  color: #2d6a4f;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+.timer-earning {
+  font-size: 13px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.timer-stop-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.timer-stop-btn:hover {
+  background: #b91c1c;
+}
+
+/* Project cards */
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.project-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid #f1f5f9;
+  border-left: 4px solid #2d6a4f;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.project-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+  transform: translateX(2px);
+}
+
+.project-card.project-active {
+  background: #f0fdf4;
+  box-shadow: 0 0 0 2px rgba(45,106,79,0.15);
+}
+
+.project-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.project-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.project-card-client {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.project-card-stats {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.project-stat {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.project-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.timer-start-btn {
+  background: #2d6a4f;
+  color: white;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.timer-start-btn:hover:not(:disabled) {
+  background: #40916c;
+  transform: scale(1.08);
+}
+
+.timer-start-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.timer-start-btn.stop {
+  background: #dc2626;
+}
+
+.timer-start-btn.stop:hover {
+  background: #b91c1c;
+}
+
+/* Time rate row in form */
+.time-rate-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* Total bar */
+.time-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Entries list */
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.entry-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.entry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.entry-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-project {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.entry-notes {
+  font-size: 11px;
+  color: #64748b;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-time {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.entry-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.entry-duration {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d6a4f;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-money {
+  font-size: 11px;
+  color: #059669;
+  font-weight: 600;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 6px;
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
 /* ---- Notes ---- */
+
 .notes {
   margin-top: 12px;
 }

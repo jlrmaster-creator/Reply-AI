@@ -6,6 +6,7 @@ import { useContacts } from "./hooks/useContacts";
 import { useFavorites } from "./hooks/useFavorites";
 import { useReminders } from "./hooks/useReminders";
 import { useNotes } from "./hooks/useNotes";
+import { useTime } from "./hooks/useTime";
 import LoginScreen from "./components/LoginScreen";
 import InputBox from "./components/InputBox";
 import ModeSelector from "./components/ModeSelector";
@@ -18,6 +19,7 @@ import Converter from "./components/Converter";
 import Entertainment from "./components/Entertainment";
 import Reminders from "./components/Reminders";
 import Notes from "./components/Notes";
+import TimeTracker from "./components/TimeTracker";
 import "./App.css";
 
 const MENU_ITEMS = [
@@ -29,6 +31,7 @@ const MENU_ITEMS = [
   { key: "entertainment", label: "Entretenimiento", icon: "🎮" },
   { key: "reminders", label: "Recordatorios", icon: "🔔" },
   { key: "notes", label: "Notas", icon: "📝" },
+  { key: "time", label: "Control de Horas", icon: "⏱️" },
 ];
 
 function MainApp() {
@@ -43,6 +46,7 @@ function MainApp() {
   const favorites = useFavorites();
   const reminders = useReminders();
   const notesHook = useNotes();
+  const timeHook = useTime();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -158,6 +162,23 @@ function MainApp() {
       ) : tab === "notes" ? (
         <div className="tab-content">
           <Notes notes={notesHook.notes} error={notesHook.error} maxNotes={notesHook.maxNotes} onAdd={notesHook.addNote} onUpdate={notesHook.updateNote} onRemove={notesHook.removeNote} onTogglePin={notesHook.togglePin} />
+        </div>
+      ) : tab === "time" ? (
+        <div className="tab-content">
+          <TimeTracker
+            projects={timeHook.projects}
+            entries={timeHook.entries}
+            error={timeHook.error}
+            maxProjects={timeHook.maxProjects}
+            activeProjectId={timeHook.activeProjectId}
+            elapsed={timeHook.elapsed}
+            secondsByProject={timeHook.secondsByProject}
+            onAddProject={timeHook.addProject}
+            onRemoveProject={timeHook.removeProject}
+            onStartTimer={timeHook.startTimer}
+            onStopTimer={timeHook.stopTimer}
+            onRemoveEntry={timeHook.removeEntry}
+          />
         </div>
       ) : (
         <div className="tab-content">
