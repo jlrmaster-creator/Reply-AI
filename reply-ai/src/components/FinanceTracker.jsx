@@ -38,6 +38,7 @@ export default function FinanceTracker({
   onRemoveEntry,
   contacts = [],
   userEmail = "",
+  userConfig = null,
 }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
@@ -69,7 +70,12 @@ export default function FinanceTracker({
     setReceiverAddress(c ? c.address : "");
     setReceiverCity(c ? c.city : "");
     
-    if (!issuerEmail && userEmail) {
+    if (userConfig) {
+      setIssuerName(userConfig.name || "Mi Empresa / Mi Nombre");
+      setIssuerCIF(userConfig.nif || "");
+      setIssuerAddress(userConfig.address || "");
+      setIssuerEmail(userConfig.email || userEmail || "");
+    } else if (!issuerEmail && userEmail) {
       setIssuerEmail(userEmail);
     }
   };
@@ -118,6 +124,15 @@ export default function FinanceTracker({
       doc.text(`Nombre: ${issuerName || "No especificado"}`, 14, y);
       if (issuerCIF) doc.text(`CIF/NIF: ${issuerCIF}`, 14, y += 6);
       if (issuerAddress) doc.text(`Dirección: ${issuerAddress}`, 14, y += 6);
+      
+      let locationParts = [];
+      if (userConfig?.city) locationParts.push(userConfig.city);
+      if (userConfig?.province) locationParts.push(userConfig.province);
+      if (userConfig?.postalCode) locationParts.push(`CP ${userConfig.postalCode}`);
+      if (locationParts.length > 0) {
+        doc.text(`Pob: ${locationParts.join(", ")}`, 14, y += 6);
+      }
+      
       if (issuerEmail) doc.text(`Email: ${issuerEmail}`, 14, y += 6);
 
       // Receptor Column (Right)

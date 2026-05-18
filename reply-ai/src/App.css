@@ -3733,6 +3733,127 @@ textarea::placeholder {
   align-self: flex-end;
 }
 
+/* ---- Config Panel ---- */
+.config-panel {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.config-panel-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  width: 100%;
+  max-width: 700px;
+  border: 1px solid #e2e8f0;
+}
+
+.config-panel-card h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.config-panel-desc {
+  color: #64748b;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.config-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.config-form-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.config-form-grid .form-group.full-width {
+  grid-column: span 2;
+}
+
+.config-form-grid label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.config-form-grid .cf-input {
+  margin-bottom: 0 !important;
+}
+
+.config-success-banner {
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #065f46;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.config-error-banner {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Header Config Button */
+.settings-header-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.settings-header-btn:hover, .settings-header-btn.active {
+  background: #ffffff;
+  color: #2d6a4f;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: #ffffff;
+}
+
+/* Responsive grid for form */
+@media (max-width: 600px) {
+  .config-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .config-form-grid .form-group.full-width {
+    grid-column: span 1;
+  }
+  .config-panel-card {
+    padding: 20px;
+  }
+}
+
 
 
 

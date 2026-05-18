@@ -1,4 +1,4 @@
-import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query, where, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const COLLECTION = "contacts";
@@ -37,4 +37,9 @@ export async function addContact({ name, phone, email, city, webpage, occupation
 
 export async function removeContact(id) {
   await deleteDoc(doc(db, COLLECTION, id));
+}
+
+export async function updateContact(id, data) {
+  const docRef = doc(db, COLLECTION, id);
+  await updateDoc(docRef, data);
 }

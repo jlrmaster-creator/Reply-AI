@@ -12,6 +12,7 @@ const DASHBOARD_ITEMS = [
   { key: "converter", label: "Conversor", icon: "🔄", desc: "Convierte divisas y unidades de forma rápida." },
   { key: "favorites", label: "Enlaces Favoritos", icon: "🔗", desc: "Accede con un clic a tus páginas web y portales más utilizados." },
   { key: "entertainment", label: "Zona Relax", icon: "🎮", desc: "Tómate un pequeño descanso para despejar la mente antes de continuar." },
+  { key: "config", label: "Configuración", icon: "⚙️", desc: "Configura tus datos fiscales y dirección comercial para los albaranes y presupuestos." },
 ];
 
 export default function Dashboard({ userEmail, onSelectTab }) {

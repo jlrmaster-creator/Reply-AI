@@ -25,6 +25,8 @@ import TimeTracker from "./components/TimeTracker";
 import FinanceTracker from "./components/FinanceTracker";
 import TaskList from "./components/TaskList";
 import Dashboard from "./components/Dashboard";
+import ConfigPanel from "./components/ConfigPanel";
+import { getUserConfig } from "./services/userService";
 import "./App.css";
 
 const MENU_ITEMS = [
@@ -40,6 +42,7 @@ const MENU_ITEMS = [
   { key: "time", label: "Control de Horas", icon: "⏱️" },
   { key: "finance", label: "Contabilidad", icon: "💰" },
   { key: "tasks", label: "Tareas", icon: "📋" },
+  { key: "config", label: "Configuración", icon: "⚙️" },
 ];
 
 function MainApp() {
@@ -47,6 +50,16 @@ function MainApp() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const { user, logout } = useAuth();
+  const [userConfig, setUserConfig] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+    getUserConfig(user.uid).then((data) => {
+      if (data) {
+        setUserConfig(data);
+      }
+    });
+  }, [user]);
 
   const reply = useReply();
   const birthdays = useBirthdays();
@@ -110,27 +123,9 @@ function MainApp() {
                 </svg>
               </button>
             )}
-            <button className="hamburger-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menú">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
+            <button className={`settings-header-btn ${tab === "config" ? "active" : ""}`} onClick={() => selectTab("config")} title="Configuración de Emisor" aria-label="Configuración de Emisor">
+              ⚙️ Configuración
             </button>
-            {menuOpen && (
-              <div className="dropdown-menu">
-                {MENU_ITEMS.map((item) => (
-                  <button
-                    key={item.key}
-                    className={`dropdown-item ${tab === item.key ? "active" : ""}`}
-                    onClick={() => selectTab(item.key)}
-                  >
-                    <span className="dropdown-icon">{item.icon}</span>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
           <h1>Toolbox AI</h1>
           <div className="header-user">
@@ -192,7 +187,7 @@ function MainApp() {
         </div>
       ) : tab === "contacts" ? (
         <div className="tab-content">
-          <Contacts contacts={contacts.contacts} error={contacts.error} onAdd={contacts.addContact} onRemove={contacts.removeContact} />
+          <Contacts contacts={contacts.contacts} error={contacts.error} onAdd={contacts.addContact} onRemove={contacts.removeContact} onUpdate={contacts.updateContact} />
         </div>
       ) : tab === "converter" ? (
         <div className="tab-content">
@@ -239,6 +234,7 @@ function MainApp() {
             onRemoveEntry={financeHook.removeEntry}
             contacts={contacts.contacts}
             userEmail={user.email}
+            userConfig={userConfig}
           />
         </div>
       ) : tab === "tasks" ? (
@@ -250,6 +246,13 @@ function MainApp() {
             onAdd={tasksHook.addTask}
             onToggleStatus={tasksHook.toggleTaskStatus}
             onRemove={tasksHook.removeTask}
+          />
+        </div>
+      ) : tab === "config" ? (
+        <div className="tab-content">
+          <ConfigPanel
+            user={user}
+            onSaveSuccess={(newConfig) => setUserConfig(newConfig)}
           />
         </div>
       ) : (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { subscribeContacts, addContact as addContactService, removeContact as removeContactService } from "../services/contactService";
+import { subscribeContacts, addContact as addContactService, removeContact as removeContactService, updateContact as updateContactService } from "../services/contactService";
 
 export function useContacts() {
   const { user } = useAuth();
@@ -47,7 +47,16 @@ export function useContacts() {
     }
   }, []);
 
-  return { contacts, error, addContact, removeContact };
+  const updateContact = useCallback(async (id, data) => {
+    setError("");
+    try {
+      await updateContactService(id, data);
+    } catch (err) {
+      setError("Error al actualizar contacto: " + getErrorMessage(err));
+    }
+  }, []);
+
+  return { contacts, error, addContact, removeContact, updateContact };
 }
 
 function getErrorMessage(err) {
