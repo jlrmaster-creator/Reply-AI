@@ -48,7 +48,7 @@ export default function TimeTracker({
   const [showClientSuggestions, setShowClientSuggestions] = useState(false);
   const clientSuggestions = React.useMemo(() => {
     const query = (form.clientName || "").trim().toLowerCase();
-    if (!query) return [];
+    if (!query) return contacts.slice(0, 10);
     return contacts.filter((c) => c.name.toLowerCase().includes(query));
   }, [contacts, form.clientName]);
 

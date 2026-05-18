@@ -46,7 +46,7 @@ export default function FinanceTracker({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestions = useMemo(() => {
     const query = (form.clientOrProvider || "").trim().toLowerCase();
-    if (!query) return [];
+    if (!query) return contacts.slice(0, 10);
     return contacts.filter((c) => c.name.toLowerCase().includes(query));
   }, [contacts, form.clientOrProvider]);
 
