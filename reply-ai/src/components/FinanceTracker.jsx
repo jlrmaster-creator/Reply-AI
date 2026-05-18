@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { jsPDF } from "jspdf";
 
 const VAT_RATES = [21, 10, 4, 0];
 const IRPF_RATES = [0, 7, 15];
@@ -37,11 +38,204 @@ export default function FinanceTracker({
   onAddEntry,
   onRemoveEntry,
   contacts = [],
+  userEmail = "",
 }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [filterQuarter, setFilterQuarter] = useState("ALL");
   const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString());
+
+  // PDF albarán states
+  const [selectedPdfEntry, setSelectedPdfEntry] = useState(null);
+  const [issuerName, setIssuerName] = useState("Mi Empresa / Mi Nombre");
+  const [issuerCIF, setIssuerCIF] = useState("");
+  const [issuerAddress, setIssuerAddress] = useState("");
+  const [issuerEmail, setIssuerEmail] = useState(userEmail || "");
+
+  const [receiverName, setReceiverName] = useState("");
+  const [receiverEmail, setReceiverEmail] = useState("");
+  const [receiverPhone, setReceiverPhone] = useState("");
+  const [receiverAddress, setReceiverAddress] = useState("");
+  const [receiverCity, setReceiverCity] = useState("");
+
+  const handleOpenPdfModal = (entry) => {
+    const c = contacts.find(
+      (contact) => contact.name.toLowerCase() === (entry.clientOrProvider || "").toLowerCase()
+    );
+
+    setSelectedPdfEntry(entry);
+    setReceiverName(entry.clientOrProvider || "");
+    setReceiverEmail(c ? c.email : "");
+    setReceiverPhone(c ? c.phone : "");
+    setReceiverAddress(c ? c.address : "");
+    setReceiverCity(c ? c.city : "");
+    
+    if (!issuerEmail && userEmail) {
+      setIssuerEmail(userEmail);
+    }
+  };
+
+  const handleGeneratePdfDoc = (entry) => {
+    try {
+      const doc = new jsPDF();
+      const primaryColor = [45, 106, 79]; // #2d6a4f
+      const textColor = [26, 26, 46];    // #1a1a2e
+      const lightGrey = [241, 245, 249];  // #f1f5f9
+      const darkGrey = [100, 116, 139];   // #64748b
+
+      // Header Green Accent Bar
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, 210, 8, "F");
+
+      // Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.setTextColor(...primaryColor);
+      doc.text("DOCUMENTO DE ALBARÁN", 14, 25);
+
+      // Metadata Box
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...darkGrey);
+      doc.text(`Fecha: ${new Date(entry.date).toLocaleDateString("es-ES")}`, 140, 20);
+      doc.text(`Nº Asiento: FT-${entry.id.substring(0, 6).toUpperCase()}`, 140, 25);
+      doc.text(`Tipo: ${entry.type === "income" ? "Factura Emitida" : "Factura Recibida"}`, 140, 30);
+
+      // Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.line(14, 35, 196, 35);
+
+      // Two Column Layout
+      // Emisor Column (Left)
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...primaryColor);
+      doc.text("DATOS DEL EMISOR", 14, 45);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...textColor);
+      let y = 52;
+      doc.text(`Nombre: ${issuerName || "No especificado"}`, 14, y);
+      if (issuerCIF) doc.text(`CIF/NIF: ${issuerCIF}`, 14, y += 6);
+      if (issuerAddress) doc.text(`Dirección: ${issuerAddress}`, 14, y += 6);
+      if (issuerEmail) doc.text(`Email: ${issuerEmail}`, 14, y += 6);
+
+      // Receptor Column (Right)
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...primaryColor);
+      doc.text("DATOS DEL RECEPTOR", 110, 45);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(...textColor);
+      y = 52;
+      doc.text(`Nombre: ${receiverName || entry.clientOrProvider || "No especificado"}`, 110, y);
+      if (receiverPhone) doc.text(`Teléfono: ${receiverPhone}`, 110, y += 6);
+      if (receiverAddress) doc.text(`Dirección: ${receiverAddress}`, 110, y += 6);
+      if (receiverCity) doc.text(`Ciudad: ${receiverCity}`, 110, y += 6);
+      if (receiverEmail) doc.text(`Email: ${receiverEmail}`, 110, y += 6);
+
+      // Table Header
+      y = Math.max(y, 85) + 10;
+      doc.setFillColor(...primaryColor);
+      doc.rect(14, y, 182, 8, "F");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.text("DESCRIPCIÓN / CONCEPTO", 18, y + 5.5);
+      doc.text("BASE", 90, y + 5.5);
+      doc.text("IVA", 120, y + 5.5);
+      if (entry.type === "income") {
+        doc.text("IRPF", 145, y + 5.5);
+      }
+      doc.text("TOTAL", 175, y + 5.5);
+
+      // Table Row
+      doc.setFillColor(...lightGrey);
+      doc.rect(14, y + 8, 182, 12, "F");
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(...textColor);
+      
+      const conceptText = entry.concept.length > 35 ? entry.concept.substring(0, 32) + "..." : entry.concept;
+      doc.text(conceptText, 18, y + 15.5);
+      doc.text(fmtMoney(entry.amount), 90, y + 15.5);
+      doc.text(`${entry.vatRate}% (${fmtMoney(entry.vatAmount)})`, 120, y + 15.5);
+      if (entry.type === "income") {
+        doc.text(`${entry.irpfRate}% (-${fmtMoney(entry.irpfAmount)})`, 145, y + 15.5);
+      }
+      doc.text(fmtMoney(entry.total), 175, y + 15.5);
+
+      // Summary Box
+      y += 30;
+      doc.setDrawColor(...primaryColor);
+      doc.setLineWidth(0.5);
+      doc.line(120, y, 196, y);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text("Subtotal (Base Imponible):", 120, y + 8);
+      doc.text(fmtMoney(entry.amount), 170, y + 8);
+
+      doc.text(`IVA (${entry.vatRate}%):`, 120, y + 14);
+      doc.text(fmtMoney(entry.vatAmount), 170, y + 14);
+
+      if (entry.type === "income" && entry.irpfRate > 0) {
+        doc.text(`IRPF (-${entry.irpfRate}%):`, 120, y + 20);
+        doc.text(`-${fmtMoney(entry.irpfAmount)}`, 170, y + 20);
+        y += 6;
+      }
+
+      doc.setFillColor(...primaryColor);
+      doc.rect(120, y + 17, 76, 10, "F");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(255, 255, 255);
+      doc.text("TOTAL DOCUMENTO:", 124, y + 23.5);
+      doc.text(fmtMoney(entry.total), 168, y + 23.5);
+
+      // Footer
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...darkGrey);
+      doc.text("Documento generado automáticamente con Toolbox AI. Gracias por su confianza.", 14, 280);
+
+      return doc;
+    } catch (err) {
+      console.error("Error generating PDF:", err);
+      return null;
+    }
+  };
+
+  const downloadPdf = (entry) => {
+    const doc = handleGeneratePdfDoc(entry);
+    if (doc) {
+      doc.save(`albaran-${entry.concept.toLowerCase().replace(/\s+/g, "_")}.pdf`);
+    }
+  };
+
+  const sendEmail = (entry) => {
+    if (!receiverEmail) return;
+    const subject = encodeURIComponent(`Albarán de entrega - ${entry.concept}`);
+    const body = encodeURIComponent(
+      `Hola ${receiverName || entry.clientOrProvider || ""},\n\n` +
+      `Le adjuntamos el albarán/documento correspondiente al asiento de contabilidad: "${entry.concept}" por un importe total de ${fmtMoney(entry.total)}.\n\n` +
+      `Por favor, recuerde descargar el PDF del albarán generado en la aplicación e incorporarlo a este correo como adjunto.\n\n` +
+      `Detalles del asiento:\n` +
+      `- Concepto: ${entry.concept}\n` +
+      `- Fecha: ${new Date(entry.date).toLocaleDateString("es-ES")}\n` +
+      `- Importe: ${fmtMoney(entry.total)}\n\n` +
+      `Un saludo,\n` +
+      `${issuerName}\n` +
+      `${issuerEmail}`
+    );
+    window.open(`mailto:${receiverEmail}?subject=${subject}&body=${body}`);
+  };
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestions = useMemo(() => {
@@ -405,14 +599,23 @@ export default function FinanceTracker({
                 <span className={`finance-item-total ${isIncome ? "income" : "expense"}`}>
                   {isIncome ? "+" : "-"} {fmtMoney(e.total)}
                 </span>
-                <button
-                  className="note-delete-btn"
-                  onClick={() => onRemoveEntry(e.id)}
-                  title="Eliminar asiento"
-                  style={{ opacity: 0.5, fontSize: 13 }}
-                >
-                  🗑️
-                </button>
+                <div className="finance-item-actions">
+                  <button
+                    className="finance-pdf-btn"
+                    onClick={() => handleOpenPdfModal(e)}
+                    title="Crear Albarán PDF"
+                  >
+                    📄 PDF
+                  </button>
+                  <button
+                    className="note-delete-btn"
+                    onClick={() => onRemoveEntry(e.id)}
+                    title="Eliminar asiento"
+                    style={{ fontSize: 13 }}
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -421,6 +624,172 @@ export default function FinanceTracker({
 
       {atLimit && (
         <p className="reminders-limit">Máximo {maxEntries} asientos permitidos.</p>
+      )}
+
+      {/* ── PDF Albarán Options Modal ── */}
+      {selectedPdfEntry && (
+        <div className="pdf-modal-overlay fade-in">
+          <div className="pdf-modal-card">
+            <div className="pdf-modal-header">
+              <h4>📄 Configurar Albarán PDF</h4>
+              <button className="pdf-modal-close" onClick={() => setSelectedPdfEntry(null)}>✕</button>
+            </div>
+            
+            <div className="pdf-modal-body">
+              <div className="pdf-modal-section">
+                <h5>🏢 Datos del Emisor (Tus Datos)</h5>
+                <div className="pdf-modal-grid">
+                  <div className="form-group">
+                    <label>Nombre / Razón Social:</label>
+                    <input
+                      type="text"
+                      className="cf-input"
+                      value={issuerName}
+                      onChange={(e) => setIssuerName(e.target.value)}
+                      placeholder="Ej: Juan Pérez S.L."
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>CIF / NIF / DNI:</label>
+                    <input
+                      type="text"
+                      className="cf-input"
+                      value={issuerCIF}
+                      onChange={(e) => setIssuerCIF(e.target.value)}
+                      placeholder="Ej: B12345678"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Dirección:</label>
+                    <input
+                      type="text"
+                      className="cf-input"
+                      value={issuerAddress}
+                      onChange={(e) => setIssuerAddress(e.target.value)}
+                      placeholder="Ej: Av. de la Constitución 14"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email de contacto:</label>
+                    <input
+                      type="email"
+                      className="cf-input"
+                      value={issuerEmail}
+                      onChange={(e) => setIssuerEmail(e.target.value)}
+                      placeholder="Ej: contacto@miempresa.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pdf-modal-section">
+                <h5>👤 Datos del Receptor (Contacto)</h5>
+                <div className="pdf-modal-grid">
+                  <div className="form-group">
+                    <label>Nombre Receptor:</label>
+                    <input
+                      type="text"
+                      className="cf-input"
+                      value={receiverName}
+                      onChange={(e) => setReceiverName(e.target.value)}
+                      placeholder="Ej: Cliente ACME"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email Receptor:</label>
+                    <input
+                      type="email"
+                      className="cf-input"
+                      value={receiverEmail}
+                      onChange={(e) => setReceiverEmail(e.target.value)}
+                      placeholder="Añade email para poder enviar por correo"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Teléfono:</label>
+                    <input
+                      type="tel"
+                      className="cf-input"
+                      value={receiverPhone}
+                      onChange={(e) => setReceiverPhone(e.target.value)}
+                      placeholder="Ej: +34 600 000 000"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Dirección:</label>
+                    <input
+                      type="text"
+                      className="cf-input"
+                      value={receiverAddress}
+                      onChange={(e) => setReceiverAddress(e.target.value)}
+                      placeholder="Ej: Calle Gran Vía 123"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Ciudad:</label>
+                    <input
+                      type="text"
+                      className="cf-input"
+                      value={receiverCity}
+                      onChange={(e) => setReceiverCity(e.target.value)}
+                      placeholder="Ej: Madrid"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pdf-modal-preview">
+                <h5>💰 Resumen de Conceptos</h5>
+                <div className="preview-row">
+                  <span>Concepto:</span>
+                  <strong>{selectedPdfEntry.concept}</strong>
+                </div>
+                <div className="preview-row">
+                  <span>Base Imponible:</span>
+                  <span>{fmtMoney(selectedPdfEntry.amount)}</span>
+                </div>
+                <div className="preview-row">
+                  <span>IVA ({selectedPdfEntry.vatRate}%):</span>
+                  <span>{fmtMoney(selectedPdfEntry.vatAmount)}</span>
+                </div>
+                {selectedPdfEntry.type === "income" && selectedPdfEntry.irpfRate > 0 && (
+                  <div className="preview-row">
+                    <span>IRPF (-{selectedPdfEntry.irpfRate}%):</span>
+                    <span className="negative">-{fmtMoney(selectedPdfEntry.irpfAmount)}</span>
+                  </div>
+                )}
+                <div className="preview-row total">
+                  <span>TOTAL DOCUMENTO:</span>
+                  <strong>{fmtMoney(selectedPdfEntry.total)}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="pdf-modal-actions">
+              <button className="pdf-action-btn cancel" onClick={() => setSelectedPdfEntry(null)}>
+                Cerrar
+              </button>
+              
+              <button className="pdf-action-btn download" onClick={() => downloadPdf(selectedPdfEntry)}>
+                📥 Descargar Albarán
+              </button>
+              
+              <button 
+                className="pdf-action-btn send" 
+                onClick={() => sendEmail(selectedPdfEntry)}
+                disabled={!receiverEmail}
+                title={receiverEmail ? "Enviar al email del contacto" : "El contacto no tiene email registrado"}
+              >
+                📧 Enviar al Contacto
+              </button>
+            </div>
+            {!receiverEmail && (
+              <p className="pdf-modal-note">
+                💡 <strong>Consejo:</strong> Si rellenas el campo de email del receptor, podrás utilizar la acción de envío por correo directamente.
+              </p>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

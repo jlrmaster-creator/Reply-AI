@@ -4,6 +4,7 @@ const OCCUPATIONS = [
   "fontanero", "electricista", "pintor", "informatico", "medico",
   "ingeniero", "arquitecto", "maestro", "herrero", "asesor",
   "jardinero", "comercial", "agricultor", "repuestos",
+  "recursos humanos", "otros",
 ];
 
 function cap(str) {
@@ -16,7 +17,9 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [webpage, setWebpage] = useState("");
+  const [address, setAddress] = useState("");
   const [occupation, setOccupation] = useState("");
+  const [customOccupation, setCustomOccupation] = useState("");
   const [rating, setRating] = useState(3);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
@@ -24,13 +27,25 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onAdd({ name: name.trim(), phone: phone.trim(), email: email.trim(), city: city.trim(), webpage: webpage.trim(), occupation, rating });
+    const finalOccupation = occupation === "otros" ? customOccupation.trim().toLowerCase() : occupation;
+    onAdd({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      city: city.trim(),
+      webpage: webpage.trim(),
+      address: address.trim(),
+      occupation: finalOccupation,
+      rating
+    });
     setName("");
     setPhone("");
     setEmail("");
     setCity("");
     setWebpage("");
+    setAddress("");
     setOccupation("");
+    setCustomOccupation("");
     setRating(3);
     setShowForm(false);
   };
@@ -40,6 +55,7 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
     if (c.phone) lines.push(`📞 ${c.phone}`);
     if (c.email) lines.push(`✉️ ${c.email}`);
     if (c.city) lines.push(`📍 ${c.city}`);
+    if (c.address) lines.push(`🏠 ${c.address}`);
     if (c.webpage) lines.push(`🌐 ${c.webpage}`);
     if (c.occupation) lines.push(`💼 ${cap(c.occupation)}`);
     lines.push(`⭐ ${'★'.repeat(c.rating)}${'☆'.repeat(5 - c.rating)}`);
@@ -79,10 +95,11 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
 
       {showForm && (
         <form className="contact-form fade-in" onSubmit={handleSubmit}>
-          <input className="cf-input" type="text" placeholder="Nombre" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input className="cf-input" type="text" placeholder="Nombre *" value={name} onChange={(e) => setName(e.target.value)} required />
           <input className="cf-input" type="tel" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} />
           <input className="cf-input" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input className="cf-input" type="text" placeholder="Ciudad" value={city} onChange={(e) => setCity(e.target.value)} />
+          <input className="cf-input" type="text" placeholder="Dirección" value={address} onChange={(e) => setAddress(e.target.value)} />
           <input className="cf-input" type="url" placeholder="Web" value={webpage} onChange={(e) => setWebpage(e.target.value)} />
 
           <select className="cf-select" value={occupation} onChange={(e) => setOccupation(e.target.value)}>
@@ -91,6 +108,17 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
               <option key={o} value={o}>{cap(o)}</option>
             ))}
           </select>
+
+          {occupation === "otros" && (
+            <input
+              className="cf-input fade-in"
+              type="text"
+              placeholder="Especifica la ocupación *"
+              value={customOccupation}
+              onChange={(e) => setCustomOccupation(e.target.value)}
+              required
+            />
+          )}
 
           <div className="cf-rating">
             <span>Valoración:</span>
@@ -135,8 +163,8 @@ export default function Contacts({ contacts, error, onAdd, onRemove }) {
                     {c.phone && <span>📞 {c.phone}</span>}
                     {c.email && <span>✉️ {c.email}</span>}
                     {c.city && <span>📍 {c.city}</span>}
-                    {c.webpage && <span>🌐 {c.webpage}</span>
-                    }
+                    {c.address && <span>🏠 {c.address}</span>}
+                    {c.webpage && <span>🌐 {c.webpage}</span>}
                     <span className="stars-small">{'★'.repeat(c.rating)}{'☆'.repeat(5 - c.rating)}</span>
                   </div>
                   {(c.phone || c.email) && (

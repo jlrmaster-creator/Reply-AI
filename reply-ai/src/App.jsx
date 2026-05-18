@@ -238,6 +238,7 @@ function MainApp() {
             onAddEntry={financeHook.addEntry}
             onRemoveEntry={financeHook.removeEntry}
             contacts={contacts.contacts}
+            userEmail={user.email}
           />
         </div>
       ) : tab === "tasks" ? (

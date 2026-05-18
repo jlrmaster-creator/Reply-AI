@@ -3387,5 +3387,284 @@ textarea::placeholder {
   color: #92400e;
 }
 
+/* ---- Finance Item Action Buttons ---- */
+.finance-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.finance-pdf-btn {
+  background: #eaf5f0;
+  border: 1px solid #cce3d8;
+  border-radius: 8px;
+  color: #2d6a4f;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.finance-pdf-btn:hover {
+  background: #2d6a4f;
+  color: #ffffff;
+  border-color: #2d6a4f;
+  transform: translateY(-1px);
+}
+
+.finance-pdf-btn:active {
+  transform: translateY(0);
+}
+
+/* ---- PDF Modal Overlay ---- */
+.pdf-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.pdf-modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 580px;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.9) translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.pdf-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+}
+
+.pdf-modal-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.pdf-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
+}
+
+.pdf-modal-close:hover {
+  color: #dc2626;
+}
+
+.pdf-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pdf-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pdf-modal-section h5 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d6a4f;
+  border-left: 3px solid #2d6a4f;
+  padding-left: 8px;
+}
+
+.pdf-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .pdf-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pdf-modal-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pdf-modal-grid label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
+}
+
+.pdf-modal-grid .cf-input {
+  margin-bottom: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.pdf-modal-preview {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pdf-modal-preview h5 {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  text-align: left;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #475569;
+}
+
+.preview-row strong {
+  color: #1e293b;
+}
+
+.preview-row.total {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+  margin-top: 4px;
+  font-weight: 800;
+  font-size: 13px;
+  color: #2d6a4f;
+}
+
+.preview-row .negative {
+  color: #b91c1c;
+}
+
+.pdf-modal-actions {
+  padding: 16px 20px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: #f8fafc;
+}
+
+.pdf-action-btn {
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdf-action-btn.cancel {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.pdf-action-btn.cancel:hover {
+  background: #cbd5e1;
+}
+
+.pdf-action-btn.download {
+  background: #2d6a4f;
+  color: #ffffff;
+  flex: 1;
+  justify-content: center;
+}
+
+.pdf-action-btn.download:hover {
+  background: #1b4332;
+  transform: translateY(-1px);
+}
+
+.pdf-action-btn.send {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.pdf-action-btn.send:hover:not(:disabled) {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.pdf-action-btn.send:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.pdf-modal-note {
+  margin: 0;
+  padding: 0 20px 16px 20px;
+  font-size: 11px;
+  color: #b45309;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.pdf-modal-note strong {
+  color: #92400e;
+}
+
+
 
 

@@ -24,7 +24,7 @@ export function useContacts() {
 
   const MAX = 100;
 
-  const addContact = useCallback(async ({ name, phone, email, city, webpage, occupation, rating }) => {
+  const addContact = useCallback(async ({ name, phone, email, city, webpage, occupation, rating, address }) => {
     if (!user) return;
     setError("");
     if (contacts.length >= MAX) {
@@ -32,7 +32,7 @@ export function useContacts() {
       return;
     }
     try {
-      await addContactService({ name, phone, email, city, webpage, occupation, rating }, user.uid);
+      await addContactService({ name, phone, email, city, webpage, occupation, rating, address }, user.uid);
     } catch (err) {
       setError("Error al añadir contacto: " + getErrorMessage(err));
     }
