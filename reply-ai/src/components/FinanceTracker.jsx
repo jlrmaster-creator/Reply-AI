@@ -269,22 +269,41 @@ export default function FinanceTracker({
     }
   };
 
-  const sendEmail = (entry) => {
+  const sendEmail = async (entry) => {
     if (!receiverEmail) return;
-    const subject = encodeURIComponent(`Albarán de entrega - ${entry.concept}`);
-    const body = encodeURIComponent(
-      `Hola ${receiverName || entry.clientOrProvider || ""},\n\n` +
-      `Le adjuntamos el albarán/documento correspondiente al asiento de contabilidad: "${entry.concept}" por un importe total de ${fmtMoney(entry.total)}.\n\n` +
-      `Por favor, recuerde descargar el PDF del albarán generado en la aplicación e incorporarlo a este correo como adjunto.\n\n` +
-      `Detalles del asiento:\n` +
-      `- Concepto: ${entry.concept}\n` +
-      `- Fecha: ${new Date(entry.date).toLocaleDateString("es-ES")}\n` +
-      `- Importe: ${fmtMoney(entry.total)}\n\n` +
-      `Un saludo,\n` +
-      `${issuerName}\n` +
-      `${issuerEmail}`
+
+    const doc = handleGeneratePdfDoc(entry);
+    if (!doc) return;
+
+    const pdfBlob = doc.output("blob");
+    const filename = `albaran-${entry.concept.toLowerCase().replace(/\s+/g, "_")}.pdf`;
+    
+    const subject = `Albarán de entrega - ${entry.concept}`;
+    const bodyText = `Hola ${receiverName || entry.clientOrProvider || ""},\n\nLe adjuntamos el albarán correspondiente al concepto: "${entry.concept}" por un importe total de ${fmtMoney(entry.total)}.\n\nUn saludo,\n${issuerName}\n${issuerEmail}`;
+
+    if (navigator.canShare && navigator.share) {
+      const file = new File([pdfBlob], filename, { type: "application/pdf" });
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: subject,
+            text: bodyText,
+            files: [file]
+          });
+          return;
+        } catch (error) {
+          console.log("Error o cancelación al compartir nativamente:", error);
+        }
+      }
+    }
+
+    // Fallback si no soporta archivos adjuntos (PC de escritorio sin share api, etc)
+    downloadPdf(entry);
+    const fallbackSubject = encodeURIComponent(subject);
+    const fallbackBody = encodeURIComponent(
+      bodyText + `\n\n(Nota: Se ha descargado el archivo PDF automáticamente en su dispositivo para que pueda adjuntarlo a este correo).`
     );
-    window.open(`mailto:${receiverEmail}?subject=${subject}&body=${body}`);
+    window.open(`mailto:${receiverEmail}?subject=${fallbackSubject}&body=${fallbackBody}`);
   };
 
   const [showSuggestions, setShowSuggestions] = useState(false);
