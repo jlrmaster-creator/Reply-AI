@@ -72,6 +72,55 @@ async function playNotificationSound() {
   }
 }
 
+let activeAlarmInterval = null;
+
+function startAlarmSound() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+
+  stopAlarmSound();
+
+  activeAlarmInterval = setInterval(() => {
+    try {
+      const nowTime = ctx.currentTime;
+      
+      const playBeep = (timeOffset) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, nowTime + timeOffset); // A5 note
+        
+        gain.gain.setValueAtTime(0, nowTime + timeOffset);
+        gain.gain.linearRampToValueAtTime(0.3, nowTime + timeOffset + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, nowTime + timeOffset + 0.25);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start(nowTime + timeOffset);
+        osc.stop(nowTime + timeOffset + 0.25);
+      };
+
+      playBeep(0);
+      playBeep(0.3);
+    } catch (e) {
+      console.warn("Alarm play error:", e);
+    }
+  }, 1000);
+}
+
+function stopAlarmSound() {
+  if (activeAlarmInterval) {
+    clearInterval(activeAlarmInterval);
+    activeAlarmInterval = null;
+  }
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getErrorMessage(err) {
@@ -85,6 +134,7 @@ function getNow() {
   const d = new Date();
   return {
     h: d.getHours(),
+    m: d.getMinutes(),
     dow: d.getDay(),
     day: d.getDate(),
     month: d.getMonth() + 1,
@@ -108,9 +158,15 @@ function shouldFireNow(r) {
     return false;
   }
 
-  // Check start hour
-  const startHour = r.earlyBird ? 7 : 9;
-  if (now.h < startHour) return false;
+  // Check start hour or specific alarm time
+  if (r.hasAlarm) {
+    const alarmHour = r.alarmHour ?? 9;
+    const alarmMinute = r.alarmMinute ?? 0;
+    if (now.h !== alarmHour || Math.abs(now.m - alarmMinute) > 1) return false;
+  } else {
+    const startHour = r.earlyBird ? 7 : 9;
+    if (now.h < startHour) return false;
+  }
 
   // Check cooldown: don't fire if fired in the last 55 min
   // (use 55 min so the 1-hour interval doesn't miss a beat)
@@ -171,6 +227,7 @@ export function useReminders() {
   const [reminders, setReminders] = useState([]);
   const [error, setError] = useState("");
   const [justFired, setJustFired] = useState(null);
+  const [ringingReminder, setRingingReminder] = useState(null);
 
   // Keep a ref that always has the latest reminders so the interval
   // closure doesn't go stale.
@@ -242,7 +299,12 @@ export function useReminders() {
         await updateSvc(r.id, { lastFiredAt: new Date().toISOString() });
 
         // Sound
-        await playNotificationSound();
+        if (r.hasAlarm) {
+          startAlarmSound();
+          setRingingReminder(r);
+        } else {
+          await playNotificationSound();
+        }
 
         // Native notification – request permission first if needed
         if (Notification.permission === "default") {
@@ -281,8 +343,14 @@ export function useReminders() {
     return () => {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
+      stopAlarmSound();
     };
   }, [user]); // ← depends only on `user`, NOT on `reminders`
+
+  const stopAlarm = useCallback(() => {
+    stopAlarmSound();
+    setRingingReminder(null);
+  }, []);
 
   // ─── CRUD callbacks ────────────────────────────────────────────────────────
 
@@ -365,5 +433,7 @@ export function useReminders() {
     removeReminder,
     shareReminder,
     unshareReminder,
+    ringingReminder,
+    stopAlarm,
   };
 }

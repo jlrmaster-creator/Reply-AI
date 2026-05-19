@@ -16,11 +16,19 @@ function earlyHour(r) {
 }
 
 function formatFireTime(r) {
-  const h = earlyHour(r);
-  if (r.frequency === "daily") return `A diario (${h}:00)`;
-  if (r.frequency === "weekly") return `Cada ${WEEKDAYS[r.weekday]} (${h}:00)`;
-  if (r.frequency === "monthly") return `Día ${r.day} de cada mes (${h}:00)`;
-  if (r.frequency === "once") return `${r.day}/${String(r.month).padStart(2, "0")} (${h}:00)`;
+  if (r.hasAlarm) {
+    const timeStr = `${String(r.alarmHour ?? 9).padStart(2, "0")}:${String(r.alarmMinute ?? 0).padStart(2, "0")}`;
+    if (r.frequency === "daily") return `A diario (${timeStr}) ⏰`;
+    if (r.frequency === "weekly") return `Cada ${WEEKDAYS[r.weekday]} (${timeStr}) ⏰`;
+    if (r.frequency === "monthly") return `Día ${r.day} de cada mes (${timeStr}) ⏰`;
+    if (r.frequency === "once") return `${r.day}/${String(r.month).padStart(2, "0")} (${timeStr}) ⏰`;
+  } else {
+    const h = earlyHour(r);
+    if (r.frequency === "daily") return `A diario (${h}:00)`;
+    if (r.frequency === "weekly") return `Cada ${WEEKDAYS[r.weekday]} (${h}:00)`;
+    if (r.frequency === "monthly") return `Día ${r.day} de cada mes (${h}:00)`;
+    if (r.frequency === "once") return `${r.day}/${String(r.month).padStart(2, "0")} (${h}:00)`;
+  }
   return "";
 }
 
@@ -33,7 +41,7 @@ function startHourText(early) {
   return (early ? 7 : 9) + ":00";
 }
 
-const EMPTY_FORM = { name: "", note: "", frequency: "daily", weekday: 1, day: 1, month: 1, earlyBird: false };
+const EMPTY_FORM = { name: "", note: "", frequency: "daily", weekday: 1, day: 1, month: 1, earlyBird: false, hasAlarm: false, alarmHour: 9, alarmMinute: 0 };
 
 export default function Reminders({ reminders, error, justFired, onAdd, onUpdate, onRemove, onShare, onUnshare }) {
   const [form, setForm] = useState({ ...EMPTY_FORM });
@@ -51,7 +59,18 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
   };
 
   const openEdit = (r) => {
-    setForm({ name: r.name, note: r.note || "", frequency: r.frequency, weekday: r.weekday ?? 1, day: r.day ?? 1, month: r.month ?? 1, earlyBird: r.earlyBird ?? false });
+    setForm({
+      name: r.name,
+      note: r.note || "",
+      frequency: r.frequency,
+      weekday: r.weekday ?? 1,
+      day: r.day ?? 1,
+      month: r.month ?? 1,
+      earlyBird: r.earlyBird ?? false,
+      hasAlarm: r.hasAlarm ?? false,
+      alarmHour: r.alarmHour ?? 9,
+      alarmMinute: r.alarmMinute ?? 0
+    });
     setEditingId(r.id);
     setShowForm(true);
   };
@@ -65,6 +84,9 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
       frequency: form.frequency,
       active: true,
       earlyBird: form.earlyBird,
+      hasAlarm: form.hasAlarm,
+      alarmHour: form.alarmHour,
+      alarmMinute: form.alarmMinute
     };
     if (form.frequency === "weekly") data.weekday = form.weekday;
     else if (form.frequency === "monthly") data.day = form.day;
@@ -153,12 +175,34 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
             </>
           )}
 
-          <label className="reminder-checkbox-label">
-            <input type="checkbox" className="reminder-checkbox" checked={form.earlyBird} onChange={(e) => set("earlyBird", e.target.checked)} />
-            <span>¿Eres madrugador? La primera notificación sonará a las <strong>{startHourText(form.earlyBird)}</strong></span>
+          <label className="reminder-checkbox-label" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input type="checkbox" className="reminder-checkbox" checked={form.hasAlarm} onChange={(e) => set("hasAlarm", e.target.checked)} />
+            <span>¿Activar alarma de despertador sonora?</span>
           </label>
 
-          <p className="reminder-form-hint">El aviso sonará cada hora desde las {startHourText(form.earlyBird)} hasta que lo desactives (🔔).</p>
+          {form.hasAlarm ? (
+            <div className="alarm-time-selectors fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px' }}>
+              <div className="reminder-label">Hora y minuto de la alarma:</div>
+              <div className="reminder-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <select className="cf-select" value={form.alarmHour} onChange={(e) => set("alarmHour", parseInt(e.target.value))} style={{ flex: 1 }}>
+                  {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, "0")}</option>)}
+                </select>
+                <span className="reminder-colon" style={{ fontWeight: 'bold' }}>:</span>
+                <select className="cf-select" value={form.alarmMinute} onChange={(e) => set("alarmMinute", parseInt(e.target.value))} style={{ flex: 1 }}>
+                  {Array.from({ length: 60 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, "0")}</option>)}
+                </select>
+              </div>
+            </div>
+          ) : (
+            <>
+              <label className="reminder-checkbox-label">
+                <input type="checkbox" className="reminder-checkbox" checked={form.earlyBird} onChange={(e) => set("earlyBird", e.target.checked)} />
+                <span>¿Eres madrugador? La primera notificación sonará a las <strong>{startHourText(form.earlyBird)}</strong></span>
+              </label>
+
+              <p className="reminder-form-hint">El aviso sonará cada hora desde las {startHourText(form.earlyBird)} hasta que lo desactives (🔔).</p>
+            </>
+          )}
 
           <div className="reminder-form-actions">
             <button type="button" className="reminder-cancel-btn" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancelar</button>
@@ -183,7 +227,13 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
                 </div>
                 {r.note && <span className="reminder-item-note">{r.note}</span>}
                 <span className="reminder-item-time">{formatFireTime(r)}</span>
-                {r.active && <span className="reminder-hourly-note">Cada hora desde las {startHourText(r.earlyBird)} hasta desactivar (🔔)</span>}
+                {r.active && (
+                  r.hasAlarm ? (
+                    <span className="reminder-hourly-note">Alarma despertador activa</span>
+                  ) : (
+                    <span className="reminder-hourly-note">Cada hora desde las {startHourText(r.earlyBird)} hasta desactivar (🔔)</span>
+                  )
+                )}
                 {r.isShared && r.ownerEmail && (
                   <span className="reminder-shared-from">Compartido por {r.ownerEmail}</span>
                 )}

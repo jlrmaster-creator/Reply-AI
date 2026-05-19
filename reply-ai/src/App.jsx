@@ -104,6 +104,19 @@ function MainApp() {
           <button className="toast-close-btn" onClick={() => reminders.setJustFired(null)} title="Cerrar">✕</button>
         </div>
       )}
+      {reminders.ringingReminder && (
+        <div className="global-alarm-overlay fade-in">
+          <div className="alarm-box">
+            <span className="alarm-icon animate-bounce">⏰</span>
+            <h3>¡Alarma Sonando!</h3>
+            <h2>{reminders.ringingReminder.name}</h2>
+            {reminders.ringingReminder.note && <p>{reminders.ringingReminder.note}</p>}
+            <button className="stop-alarm-btn" onClick={reminders.stopAlarm}>
+              🔕 APAGAR ALARMA
+            </button>
+          </div>
+        </div>
+      )}
       <header>
         <div className="header-row">
           <div className="header-left" ref={menuRef}>
