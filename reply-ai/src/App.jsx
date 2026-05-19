@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
-import { useReply } from "./hooks/useReply";
-import { useBirthdays } from "./hooks/useBirthdays";
 import { useContacts } from "./hooks/useContacts";
 import { useFavorites } from "./hooks/useFavorites";
 import { useReminders } from "./hooks/useReminders";
@@ -10,11 +8,6 @@ import { useTime } from "./hooks/useTime";
 import { useFinance } from "./hooks/useFinance";
 import { useTasks } from "./hooks/useTasks";
 import LoginScreen from "./components/LoginScreen";
-import InputBox from "./components/InputBox";
-import ModeSelector from "./components/ModeSelector";
-import GenerateButton from "./components/GenerateButton";
-import ResponseCard from "./components/ResponseCard";
-import Birthdays from "./components/Birthdays";
 import Contacts from "./components/Contacts";
 import Favorites from "./components/Favorites";
 import Converter from "./components/Converter";
@@ -31,8 +24,6 @@ import "./App.css";
 
 const MENU_ITEMS = [
   { key: "home", label: "Inicio", icon: "🏠" },
-  { key: "reply", label: "Responder", icon: "💬" },
-  { key: "birthdays", label: "Cumpleaños", icon: "🎂" },
   { key: "contacts", label: "Contactos", icon: "👥" },
   { key: "converter", label: "Conversor", icon: "🔄" },
   { key: "favorites", label: "Favoritos", icon: "🔗" },
@@ -61,8 +52,6 @@ function MainApp() {
     });
   }, [user]);
 
-  const reply = useReply();
-  const birthdays = useBirthdays();
   const contacts = useContacts();
   const favorites = useFavorites();
   const reminders = useReminders();
@@ -156,35 +145,6 @@ function MainApp() {
 
       {tab === "home" ? (
         <Dashboard userEmail={user.email} onSelectTab={selectTab} />
-      ) : tab === "reply" ? (
-        <div className="tab-content">
-          <InputBox value={reply.message} onChange={(e) => reply.setMessage(e.target.value)} />
-          <ModeSelector selected={reply.mode} onSelect={reply.setMode} />
-          <GenerateButton onClick={reply.generate} loading={reply.loading} />
-          {reply.error && <p className="error fade-in">{reply.error}</p>}
-          <ResponseCard response={reply.response} mode={reply.mode} onSend={reply.sendToWhatsApp} onRegenerate={reply.generate} onMakeFunnier={reply.makeFunnier} />
-          {reply.history.length > 0 && (
-            <section className="history">
-              <div className="history-header">
-                <h3>Historial</h3>
-                <button className="history-clear" onClick={reply.clearHistory}>Limpiar</button>
-              </div>
-              {reply.history.slice(0, 5).map((item, i) => (
-                <div key={i} className="history-item fade-in">
-                  <div className="history-item-header">
-                    <span className="history-mode-badge">{item.mode === "funny" ? "😄" : item.mode === "elegant" ? "⭐" : item.mode === "cold" ? "❄️" : "🔑"} {item.mode}</span>
-                    <span className="history-time">{new Date(item.date).toLocaleTimeString()}</span>
-                  </div>
-                  <p className="history-reply">{item.reply}</p>
-                </div>
-              ))}
-            </section>
-          )}
-        </div>
-      ) : tab === "birthdays" ? (
-        <div className="tab-content">
-          <Birthdays friends={birthdays.friends} todayBirthdays={birthdays.todayBirthdays} error={birthdays.error} onAdd={birthdays.addFriend} onRemove={birthdays.removeFriend} onSendGreeting={birthdays.sendGreeting} onSendReminder={birthdays.sendReminder} />
-        </div>
       ) : tab === "contacts" ? (
         <div className="tab-content">
           <Contacts contacts={contacts.contacts} error={contacts.error} onAdd={contacts.addContact} onRemove={contacts.removeContact} onUpdate={contacts.updateContact} />

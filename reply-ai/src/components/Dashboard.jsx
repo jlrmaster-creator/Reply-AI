@@ -1,14 +1,12 @@
 import React from "react";
 
 const DASHBOARD_ITEMS = [
-  { key: "reply", label: "Asistente AI", icon: "💬", desc: "Redacta respuestas profesionales con Inteligencia Artificial para tus clientes." },
   { key: "time", label: "Control de Horas", icon: "⏱️", desc: "Monitorea el tiempo dedicado a tus proyectos y calcula tus ingresos al instante." },
   { key: "finance", label: "Contabilidad", icon: "💰", desc: "Lleva el registro de tus facturas, gastos y previsión de IVA trimestral." },
   { key: "tasks", label: "Tareas", icon: "📋", desc: "Gestiona tu flujo de trabajo diario con prioridades y fechas límite." },
   { key: "notes", label: "Notas Rápidas", icon: "📝", desc: "Apunta ideas, tareas pendientes o datos breves en pósits de colores." },
   { key: "reminders", label: "Recordatorios", icon: "🔔", desc: "Programa alertas sonoras y notificaciones en segundo plano para tus citas." },
   { key: "contacts", label: "Contactos", icon: "👥", desc: "Organiza tu cartera de clientes, proveedores y colaboradores." },
-  { key: "birthdays", label: "Cumpleaños", icon: "🎂", desc: "Fideliza a tus clientes felicitándolos en su día especial." },
   { key: "converter", label: "Conversor", icon: "🔄", desc: "Convierte divisas y unidades de forma rápida." },
   { key: "favorites", label: "Enlaces Favoritos", icon: "🔗", desc: "Accede con un clic a tus páginas web y portales más utilizados." },
   { key: "entertainment", label: "Zona Relax", icon: "🎮", desc: "Tómate un pequeño descanso para despejar la mente antes de continuar." },
