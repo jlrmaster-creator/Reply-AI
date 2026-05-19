@@ -48,8 +48,10 @@ function MainApp() {
   useEffect(() => {
     if (!user) return;
     getUserConfig(user.uid).then((data) => {
-      if (data) {
+      if (data && (data.name || data.nif || data.email)) {
         setUserConfig(data);
+      } else {
+        setTab("config");
       }
     });
   }, [user]);
