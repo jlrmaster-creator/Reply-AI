@@ -28,6 +28,40 @@ function getAudioCtx() {
   return audioCtx;
 }
 
+let silentOscillator = null;
+let silentGain = null;
+
+function startSilentAudio() {
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    if (silentOscillator) return;
+
+    silentOscillator = ctx.createOscillator();
+    silentGain = ctx.createGain();
+    
+    silentOscillator.frequency.setValueAtTime(20, ctx.currentTime);
+    silentGain.gain.setValueAtTime(0.00001, ctx.currentTime);
+    
+    silentOscillator.connect(silentGain);
+    silentGain.connect(ctx.destination);
+    
+    silentOscillator.start();
+  } catch (e) {
+    console.warn("Silent audio failed:", e);
+  }
+}
+
+function stopSilentAudio() {
+  if (silentOscillator) {
+    try {
+      silentOscillator.stop();
+    } catch (e) {}
+    silentOscillator = null;
+    silentGain = null;
+  }
+}
+
 // Resume AudioContext on ANY user interaction (not just once)
 function resumeAudio() {
   const c = getAudioCtx();
@@ -282,6 +316,20 @@ export function useReminders() {
     });
   }, [user, reminders.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Silent audio loop to keep tab active in background ────────────────────
+  useEffect(() => {
+    if (!user) return;
+    const hasActiveAlarms = reminders.some((r) => r.active && r.hasAlarm && !r.isShared);
+    if (hasActiveAlarms) {
+      startSilentAudio();
+    } else {
+      stopSilentAudio();
+    }
+    return () => {
+      stopSilentAudio();
+    };
+  }, [user, reminders]);
+
   // ── Timer / notification engine ───────────────────────────────────────────
   useEffect(() => {
     if (!user) return;
@@ -331,7 +379,37 @@ export function useReminders() {
     // Fire once on mount / user login
     fireAll();
 
-    // Fire every 60 seconds (was 30s, but with 55-min cooldown 60s is fine)
+    // Use Web Worker to bypass main thread timer throttling in background
+    let worker = null;
+    try {
+      const workerCode = `
+        let timer = null;
+        self.onmessage = function(e) {
+          if (e.data === 'start') {
+            if (timer) clearInterval(timer);
+            timer = setInterval(() => {
+              self.postMessage('tick');
+            }, 30000);
+          } else if (e.data === 'stop') {
+            if (timer) clearInterval(timer);
+            timer = null;
+          }
+        };
+      `;
+      const blob = new Blob([workerCode], { type: "application/javascript" });
+      const workerUrl = URL.createObjectURL(blob);
+      worker = new Worker(workerUrl);
+      worker.onmessage = (e) => {
+        if (e.data === "tick") {
+          fireAll();
+        }
+      };
+      worker.postMessage("start");
+    } catch (e) {
+      console.warn("Worker timer creation failed, falling back:", e);
+    }
+
+    // Also run standard interval fallback (main thread)
     const interval = setInterval(fireAll, 60_000);
 
     // Also fire when the tab becomes visible again
@@ -341,6 +419,10 @@ export function useReminders() {
     document.addEventListener("visibilitychange", onVisible);
 
     return () => {
+      if (worker) {
+        worker.postMessage("stop");
+        worker.terminate();
+      }
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
       stopAlarmSound();
