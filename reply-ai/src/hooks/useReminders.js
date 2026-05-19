@@ -235,7 +235,9 @@ function showNativeNotification(reminder) {
           badge: "./icons/icon-192.svg",
           tag: reminder.id,
           renotify: true,
-          vibrate: [200, 100, 200],
+          vibrate: reminder.hasAlarm
+            ? [500, 250, 500, 250, 500, 250, 500, 250, 500, 250, 500]
+            : [200, 100, 200],
         });
       }).catch((err) => {
         console.warn("SW notification failed, falling back:", err);

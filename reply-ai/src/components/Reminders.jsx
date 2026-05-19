@@ -49,6 +49,42 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
   const [editingId, setEditingId] = useState(null);
   const [shareId, setShareId] = useState(null);
   const [shareEmail, setShareEmail] = useState("");
+  const [showNightMode, setShowNightMode] = useState(false);
+  const [nightTime, setNightTime] = useState(new Date());
+
+  React.useEffect(() => {
+    if (!showNightMode) return;
+    const interval = setInterval(() => {
+      setNightTime(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [showNightMode]);
+
+  React.useEffect(() => {
+    let wakeLock = null;
+    const requestLock = async () => {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLock = await navigator.wakeLock.request('screen');
+          console.log("Screen Wake Lock activated");
+        } catch (err) {
+          console.warn("Failed to request wake lock", err);
+        }
+      }
+    };
+
+    if (showNightMode) {
+      requestLock();
+    }
+
+    return () => {
+      if (wakeLock) {
+        wakeLock.release().then(() => {
+          console.log("Screen Wake Lock released");
+        }).catch(() => {});
+      }
+    };
+  }, [showNightMode]);
 
   const set = (field, val) => setForm((f) => ({ ...f, [field]: val }));
 
@@ -128,9 +164,14 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
 
       <div className="reminders-header">
         <h3>Recordatorios {reminders.length > 0 && <span className="count-badge">{reminders.length}</span>}</h3>
-        <button className="add-reminder-btn" onClick={openNew} disabled={ownedCount >= 5 && !editingId}>
-          + Añadir
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="night-mode-btn" type="button" onClick={() => setShowNightMode(true)} style={{ background: '#475569', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', fontWeight: '600' }}>
+            🌙 Modo Noche
+          </button>
+          <button className="add-reminder-btn" onClick={openNew} disabled={ownedCount >= 5 && !editingId}>
+            + Añadir
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -272,6 +313,43 @@ export default function Reminders({ reminders, error, justFired, onAdd, onUpdate
       </div>
 
       {ownedCount >= 5 && !editingId && <p className="reminders-limit">Máximo 5 recordatorios propios permitidos.</p>}
+
+      {showNightMode && (
+        <div className="night-clock-overlay fade-in">
+          <button className="night-clock-close" onClick={() => setShowNightMode(false)}>
+            ✕ Salir del Modo Noche
+          </button>
+          <div className="night-clock-content">
+            <div className="night-clock-time">
+              {nightTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
+            <div className="night-clock-date">
+              {nightTime.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+            <div className="night-clock-info">
+              <span className="night-clock-pulse">●</span> Pantalla siempre encendida (Wake Lock)
+            </div>
+            <div className="night-clock-hint">
+              Coloca el teléfono en el cargador. Tus alarmas programadas sonarán a la hora establecida.
+            </div>
+
+            <div className="night-clock-alarms">
+              <h4>Próximas Alarmas:</h4>
+              {reminders.filter(r => r.active && r.hasAlarm).length === 0 ? (
+                <p className="no-alarms-text">No hay alarmas programadas</p>
+              ) : (
+                reminders.filter(r => r.active && r.hasAlarm).map(r => (
+                  <div key={r.id} className="night-clock-alarm-item">
+                    <span className="bell">⏰</span>
+                    <span className="name">{r.name}</span>
+                    <span className="time">{String(r.alarmHour).padStart(2, '0')}:{String(r.alarmMinute).padStart(2, '0')}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

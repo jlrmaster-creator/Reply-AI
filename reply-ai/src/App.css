@@ -4083,6 +4083,159 @@ textarea::placeholder {
   transform: translateY(0);
 }
 
+/* ---- Night Mode Clock Overlay ---- */
+.night-clock-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #05070c;
+  color: #10b981;
+  z-index: 11000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  font-family: monospace;
+}
+
+.night-clock-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.night-clock-close:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.night-clock-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.night-clock-time {
+  font-size: 80px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  color: #10b981;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+@media (max-width: 600px) {
+  .night-clock-time {
+    font-size: 52px;
+  }
+}
+
+.night-clock-date {
+  font-size: 18px;
+  color: #047857;
+  text-transform: capitalize;
+  margin-bottom: 40px;
+}
+
+.night-clock-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.05);
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  margin-bottom: 12px;
+}
+
+.night-clock-pulse {
+  color: #10b981;
+  animation: pulseDim 2s infinite;
+}
+
+@keyframes pulseDim {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.night-clock-hint {
+  font-size: 12.5px;
+  color: #047857;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 40px;
+  max-width: 380px;
+}
+
+.night-clock-alarms {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: left;
+}
+
+.night-clock-alarms h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.no-alarms-text {
+  font-size: 13px;
+  color: #047857;
+  margin: 0;
+}
+
+.night-clock-alarm-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(16, 185, 129, 0.1);
+  font-size: 14px;
+}
+
+.night-clock-alarm-item:last-child {
+  border-bottom: none;
+}
+
+.night-clock-alarm-item .bell {
+  margin-right: 8px;
+  font-size: 15px;
+}
+
+.night-clock-alarm-item .name {
+  color: #a7f3d0;
+  flex: 1;
+}
+
+.night-clock-alarm-item .time {
+  font-weight: bold;
+  color: #10b981;
+}
+
 
 
 
