@@ -9,6 +9,7 @@ const DASHBOARD_ITEMS = [
   { key: "contacts", label: "Contactos", icon: "👥", desc: "Organiza tu cartera de clientes, proveedores y colaboradores." },
   { key: "converter", label: "Conversor", icon: "🔄", desc: "Convierte divisas y unidades de forma rápida." },
   { key: "favorites", label: "Enlaces Favoritos", icon: "🔗", desc: "Accede con un clic a tus páginas web y portales más utilizados." },
+  { key: "professionals", label: "Profesionales", icon: "🏢", desc: "Directorio de empresas recomendadas y colaboradores de Toolbox." },
   { key: "entertainment", label: "Zona Relax", icon: "🎮", desc: "Tómate un pequeño descanso para despejar la mente antes de continuar." },
 ];
 

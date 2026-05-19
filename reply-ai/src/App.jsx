@@ -19,6 +19,7 @@ import FinanceTracker from "./components/FinanceTracker";
 import TaskList from "./components/TaskList";
 import Dashboard from "./components/Dashboard";
 import ConfigPanel from "./components/ConfigPanel";
+import ProfessionalsDirectory from "./components/ProfessionalsDirectory";
 import { getUserConfig } from "./services/userService";
 import "./App.css";
 
@@ -33,6 +34,7 @@ const MENU_ITEMS = [
   { key: "time", label: "Control de Horas", icon: "⏱️" },
   { key: "finance", label: "Contabilidad", icon: "💰" },
   { key: "tasks", label: "Tareas", icon: "📋" },
+  { key: "professionals", label: "Profesionales", icon: "🏢" },
   { key: "config", label: "Configuración", icon: "⚙️" },
 ];
 
@@ -214,6 +216,10 @@ function MainApp() {
             user={user}
             onSaveSuccess={(newConfig) => setUserConfig(newConfig)}
           />
+        </div>
+      ) : tab === "professionals" ? (
+        <div className="tab-content">
+          <ProfessionalsDirectory />
         </div>
       ) : (
         <div className="tab-content">
