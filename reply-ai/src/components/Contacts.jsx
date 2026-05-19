@@ -320,8 +320,8 @@ export default function Contacts({ contacts, error, onAdd, onRemove, onUpdate })
               </select>
 
               <div className="pdf-modal-actions" style={{ marginTop: '15px' }}>
-                <button type="button" className="pdf-modal-btn cancel" onClick={() => setEditingContact(null)}>Cancelar</button>
-                <button type="submit" className="pdf-modal-btn generate" style={{ background: '#2d6a4f' }}>Guardar Cambios</button>
+                <button type="button" className="pdf-action-btn cancel" onClick={() => setEditingContact(null)}>✕ Cancelar</button>
+                <button type="submit" className="pdf-action-btn download" style={{ background: '#2d6a4f' }}>💾 Guardar Cambios</button>
               </div>
             </form>
           </div>
