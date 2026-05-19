@@ -120,13 +120,6 @@ function MainApp() {
       <header>
         <div className="header-row">
           <div className="header-left" ref={menuRef}>
-            {tab !== "home" && (
-              <button className="back-btn" onClick={() => selectTab("home")} title="Volver al Inicio" aria-label="Volver al Inicio">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-            )}
             <button className={`settings-header-btn ${tab === "config" ? "active" : ""}`} onClick={() => selectTab("config")} title="Configuración de Emisor" aria-label="Configuración de Emisor" style={{ fontSize: "16px", padding: "6px 10px" }}>
               ⚙️
             </button>
